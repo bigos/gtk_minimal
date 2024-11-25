@@ -1,3 +1,19 @@
 * Readme
 
 This is my struggle to move beyond the basics and write a program that works with Gtk4.
+
+** Error
+#+begin_example
+~/Programming/OCaml/gtk_minimal$ opam exec -- dune build
+File "bin/main.ml", line 119, characters 36-51:
+119 |   drawing_area_set_draw_func canvas cairo_draw_func null null ;
+                                          ^^^^^^^^^^^^^^^
+Error: This expression has type widget -> context -> 'a -> 'b -> 'c -> unit
+       but an expression was expected of type
+         widget ->
+         cairo_t structure Ctypes_static.ptr ->
+         int -> int -> gpointer -> unit
+       Type context is not compatible with type
+         cairo_t structure Ctypes_static.ptr =
+           (cairo_t structure, [ `C ]) pointer
+#+end_example
