@@ -1,0 +1,3 @@
+(library
+ (name gtk_minimal)
+ (libraries ctypes-foreign))

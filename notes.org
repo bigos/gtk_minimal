@@ -1,0 +1,99 @@
+* Notes
+I need to find a minimal gtk4 example and run it with ctypes.
+
+** documentation
+
+*** libraries
+file:/usr/lib/x86_64-linux-gnu/pkgconfig/gtk4.pc::13
+
+*** gtk overview
+https://docs.gtk.org/gtk4/getting_started.html
+
+*** ctypes
+my readme for [[file:~/Programming/OCaml/ocaml_experiments/README.org::*ctypes][ctypes]]
+and [[file:~/Programming/Pyrulis/OCaml/Readme.org::*projects using ctypes][projects using ctypes]]
+and [[file:~/Programming/OCaml/ncforeign/Readme.org::*Readme][Readme for ncforeign]]
+
+blog
+https://medium.com/@romain.beauxis/advanced-c-binding-using-ocaml-ctypes-and-dune-cc3f4cbab302
+
+somebody's struggle
+https://discuss.ocaml.org/t/g-object-unref-and-ctypes/9922
+
+*** my attempts
+file:~/Programming/OCaml/ncforeign/dune-project::1
+
+file:~/Programming/OCaml/ocaml-ctypes/dune-project::1
+
+*** with the environment fix
+in the Emacs evaluate the following. That can be done by going to the last line of the block.
+
+#+begin_src emacs-lisp
+(setenv  "CAML_LD_LIBRARY_PATH"
+      "/home/jacek/.opam/default/lib/stublibs:/home/jacek/.opam/default/lib/ocaml/stublibs:/home/jacek/.opam/default/lib/ocaml")
+#+end_src
+
+*** utop use
+#+begin_example
+  cd ~/Programming/OCaml/ocaml_experiments/gtk_minimal
+  opam exec -- dune utop
+  # -- in utop
+  #use "./bin/main.ml";
+  # -- or Tuareg repl --version 1
+  # copy the 3 lines in one go and paste to repl
+  #cd "/home/jacek/Programming/OCaml/ocaml_experiments/gtk_minimal";;
+  #use ".ocamlinit";;
+  #use "./bin/main.ml";;
+#+end_example
+
+** dune exec et al
+https://ocaml.org/docs/libraries-dune
+
+following the dune change
+#+begin_example
+  opam exec -- dune build
+  opam exec -- dune exec ./bin/main.exe
+#+end_example
+
+** code
+file:~/Programming/OCaml/ocaml_experiments/gtk_minimal/bin/main.ml::9
+
+** cairo
+http://chris00.github.io/ocaml-cairo/
+
+https://www.cairographics.org/documentation/
+https://www.cairographics.org/cookbook/
+
+https://opam.ocaml.org/packages/cairo2/
+
+#+begin_example
+opam install cairo2
+#+end_example
+
+https://github.com/Chris00/ocaml-cairo/blob/master/examples-gtk/gtk_demo.ml
+
+https://garrigue.github.io/lablgtk/
+
+*** callbacks
+https://courses.cs.cornell.edu/cs3110/2021sp/textbook/adv/callbacks.html
+
+https://medium.com/@romain.beauxis/advanced-c-binding-using-ocaml-ctypes-and-dune-cc3f4cbab302
+
+https://discuss.ocaml.org/t/how-to-prevent-a-closure-that-passed-to-a-c-function-as-a-callback-from-being-garbage-collected-prematurely/14901
+
+https://ocaml.org/manual/5.2/intfc.html#s%3Ac-callback
+
+https://ocaml.org/p/ctypes/0.20.1/doc/index.html
+
+https://github.com/yallop/ocaml-ctypes/wiki/ctypes-tutorial#passing-functions-to-c
+
+** clops gui
+See [[file:~/Programming/Lisp/clops-gui/README.org::*Clops-Gui][Clops-Gui]] readme
+
+that is called by main [[file:~/Programming/Lisp/clops-gui/src/gui-window-gtk.lisp::defun window (lisp-window]]
+
+call window creation and add it to the app window tracking
+[[file:~/Programming/Lisp/clops-gui/src/gui-window-gtk.lisp::(defun window-activation-and-connection]]
+
+window creation, canvas and events
+[[file:~/Programming/Lisp/clops-gui/src/gui-window-gtk.lisp::(defun new-window-for-app]]

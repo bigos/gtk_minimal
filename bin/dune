@@ -1,0 +1,6 @@
+(executable
+ (public_name gtk_minimal)
+ (name main)
+ (link_flags
+  (:standard -cclib -lgtk-4))
+ (libraries  ctypes-foreign base stdio cairo2))
