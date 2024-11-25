@@ -1,0 +1,3 @@
+* Readme
+
+This is my struggle to move beyond the basics and write a program that works with Gtk4.
