@@ -1,0 +1,9 @@
+print_string "gtk_minimal ocamlinit test\n" ;;
+
+#use "topfind";;
+
+#thread;;
+
+#require "ctypes";;
+
+#require "ctypes.foreign";;
