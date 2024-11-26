@@ -88,7 +88,11 @@ let widget_set_vexpand =
   foreign ~from:libgtk "gtk_widget_set_vexpand"
     (widget @-> bool @-> returning void)
 
-let cairo_draw_func _area cr _width _height _data =
+(* I need to have cr value for cairo2 coming from the pointer cr0 *)
+(* https://github.com/yallop/ocaml-ctypes/wiki/ctypes-tutorial#pointers-and-arrays *)
+(* how can I do it? *)
+let cairo_draw_func _area _cr0 _width _height _data =
+  let cr = Ctypes.allocate cairo_t (cairo' ()) in
   set_source_rgb cr 0.9 0.0 0.0 ;
   select_font_face cr "DejaVu Sans" ~weight:Bold ;
   set_font_size cr 1.2 ;
