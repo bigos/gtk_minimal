@@ -2,6 +2,18 @@
 
 This is my struggle to move beyond the basics and write a program that works with Gtk4.
 
+** My Emacs setup
+https://github.com/bigos/prelude/blob/ee2ff8fcc2f9cf0382bd365495413060dc274039/personal/organised.el#L607
+
+** Starting everything
+Start Linux terminal and enter the following commands
+
+#+begin_example
+cd ~/Programming/OCaml/gtk_minimal/
+opam exec -- emacs &
+opam exec --  dune build
+#+end_example
+
 ** Error
 #+begin_example
 ~/Programming/OCaml/gtk_minimal$ opam exec -- dune build
