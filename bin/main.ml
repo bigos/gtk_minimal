@@ -107,14 +107,14 @@ let set_source_rgb =
     (gpointer @-> double @-> double @-> double @-> returning void)
     ~from:libcairo
 
-(* how can I do it? *)
-(* https://docs.gtk.org/gtk4/callback.DrawingAreaDrawFunc.html *)
-(* Gtk4 gives me cairo_t but the cairo2 library wants context *)
+let paint = foreign "cairo_paint" (gpointer @-> returning void) ~from:libcairo
+
 let cairo_draw_func _area cr _width _height _data =
   (* let cr = Ctypes.(coerce cairo_t Cairo.context cr0) in *)
   (* let cr = Foreign.foreign_value "cairo_t" Cairo.context cr0 in *)
   (* let cr = Ctypes.(coerce (ptr cairo_t) (ptr context) cr0) in *)
   set_source_rgb cr 0.9 0.0 0.0 ;
+  paint cr ;
   ()
 (* select_font_face cr "DejaVu Sans" ~weight:Bold ; *)
 (* set_font_size cr 1.2 ; *)
