@@ -37,53 +37,60 @@ let gpointer : gpointer typ = ptr void
 let callback_t = application @-> gpointer @-> returning void
 
 let gtk_application_new =
-  foreign ~from:libgtk "gtk_application_new"
+  foreign "gtk_application_new"
     (string @-> int @-> returning application)
+    ~from:libgtk
 
 let gtk_application_window_new =
-  foreign ~from:libgtk "gtk_application_window_new"
+  foreign "gtk_application_window_new"
     (application @-> returning window)
+    ~from:libgtk
 
 let window_set_title =
-  foreign ~from:libgtk "gtk_window_set_title"
+  foreign "gtk_window_set_title"
     (window @-> string @-> returning void)
+    ~from:libgtk
 
 let window_set_default_size =
-  foreign ~from:libgtk "gtk_window_set_default_size"
+  foreign "gtk_window_set_default_size"
     (window @-> int @-> int @-> returning void)
+    ~from:libgtk
 
 (* let widget_show = *)
 (*   foreign ~from:libgtk "gtk_widget_show" (widget @-> returning void) *)
 
 let application_run =
-  foreign ~from:libgio "g_application_run"
+  foreign "g_application_run"
     (application @-> int @-> gpointer @-> returning int)
+    ~from:libgio
 
 let object_unref =
-  foreign ~from:libgobject "g_object_unref" (gpointer @-> returning void)
+  foreign "g_object_unref" (gpointer @-> returning void) ~from:libgobject
 
 let signal_connect app s cb p =
-  foreign ~from:libgobject "g_signal_connect_data"
+  foreign "g_signal_connect_data"
     ( application @-> string @-> funptr callback_t @-> gpointer @-> gpointer
     @-> int @-> returning void )
-    app s cb p null 0
+    app s cb p null 0 ~from:libgobject
 
 let window_present =
-  foreign ~from:libgtk "gtk_window_present" (widget @-> returning void)
+  foreign "gtk_window_present" (widget @-> returning void) ~from:libgtk
 
 let application_add_window =
-  foreign ~from:libgtk "gtk_application_add_window"
+  foreign "gtk_application_add_window"
     (application @-> gpointer @-> returning void)
+    ~from:libgtk
 
 let box_new =
-  foreign ~from:libgtk "gtk_box_new" (int @-> int @-> returning widget)
+  foreign "gtk_box_new" (int @-> int @-> returning widget) ~from:libgtk
 
 let drawing_area_new =
-  foreign ~from:libgtk "gtk_drawing_area_new" (void @-> returning widget)
+  foreign "gtk_drawing_area_new" (void @-> returning widget) ~from:libgtk
 
 let widget_set_vexpand =
-  foreign ~from:libgtk "gtk_widget_set_vexpand"
+  foreign "gtk_widget_set_vexpand"
     (widget @-> bool @-> returning void)
+    ~from:libgtk
 
 (* how can I do it? *)
 (* https://docs.gtk.org/gtk4/callback.DrawingAreaDrawFunc.html *)
@@ -102,11 +109,12 @@ let cairo_draw_func _area _cr0 _width _height _data = ()
 (* show_text cr "a" *)
 
 let drawing_area_set_draw_func =
-  foreign ~from:libgtk "gtk_drawing_area_set_draw_func"
+  foreign "gtk_drawing_area_set_draw_func"
     ( widget
     @-> funptr
           (widget @-> gpointer @-> int @-> int @-> gpointer @-> returning void)
     @-> gpointer @-> gpointer @-> returning void )
+    ~from:libgtk
 
 let activate : application -> gpointer -> unit =
  fun app _data ->
