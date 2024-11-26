@@ -84,6 +84,16 @@ let application_add_window =
 let box_new =
   foreign "gtk_box_new" (int @-> int @-> returning widget) ~from:libgtk
 
+let box_append =
+  foreign "gtk_box_append"
+    (gpointer @-> gpointer @-> returning void)
+    ~from:libgtk
+
+let window_set_child =
+  foreign "gtk_window_set_child"
+    (gpointer @-> gpointer @-> returning void)
+    ~from:libgtk
+
 let drawing_area_new =
   foreign "gtk_drawing_area_new" (void @-> returning widget) ~from:libgtk
 
@@ -129,13 +139,14 @@ let activate : application -> gpointer -> unit =
   window_set_title win "Gtk Minimal" ;
   window_set_default_size win 600 400 ;
   (* create box with orientation vertical and spacing 0 *)
-  let _box = box_new 1 0 in
+  let box = box_new 1 0 in
   let canvas = drawing_area_new () in
   widget_set_vexpand canvas true ;
   drawing_area_set_draw_func canvas cairo_draw_func null null ;
   (* set canvas events *)
-  (* append canvas to box *)
+  box_append box canvas ;
   (* set box as child of win *)
+  window_set_child win box ;
   (* set win events *)
   window_present win
 
