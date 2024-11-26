@@ -91,8 +91,8 @@ let widget_set_vexpand =
 (* I need to have cr value for cairo2 coming from the pointer cr0 *)
 (* https://github.com/yallop/ocaml-ctypes/wiki/ctypes-tutorial#pointers-and-arrays *)
 (* how can I do it? *)
-let cairo_draw_func _area _cr0 _width _height _data =
-  let cr = Ctypes.allocate cairo_t (cairo' ()) in
+let cairo_draw_func _area cr0 _width _height _data =
+  let cr = Ctypes.(coerce (ptr void) cairo_t cr0) in
   set_source_rgb cr 0.9 0.0 0.0 ;
   select_font_face cr "DejaVu Sans" ~weight:Bold ;
   set_font_size cr 1.2 ;
