@@ -109,8 +109,6 @@ let set_source_rgb =
 
 let paint = foreign "cairo_paint" (gpointer @-> returning void) ~from:libcairo
 
-(* Is it possible to use cairo2 library here, or I need to use my own bindings *)
-(* it it is possible, how do I pass the cr to cairo2? *)
 let cairo_draw_func _area cr _width _height _data =
   set_source_rgb cr 0.9 0.0 0.0 ;
   paint cr ;
