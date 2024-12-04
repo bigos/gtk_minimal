@@ -121,40 +121,49 @@ let set_font_size =
 
 (* this may be wrong  *)
 
-type cairo_text_extents_t
+(* type cairo_text_extents_t *)
 
-let cairo_text_extents_t : cairo_text_extents_t structure typ =
-  structure "cairo_text_extents_t"
+(* let cairo_text_extents_t : cairo_text_extents_t structure typ = *)
+(*   structure "cairo_text_extents_t" *)
 
-let x_bearing = field x_bearing "x_bearing" double
+(* let x_bearing = field x_bearing "x_bearing" double *)
 
-let y_bearing = field y_bearing "y_bearing" double
+(* let y_bearing = field y_bearing "y_bearing" double *)
 
-let width = field width "width" double
+(* let width = field width "width" double *)
 
-let height = field height "height" double
+(* let height = field height "height" double *)
 
-let x_advvance = field x_advvance "x_advvance" double
+(* let x_advvance = field x_advvance "x_advvance" double *)
 
-let y_advvance = field y_advvance "y_advvance" double
+(* let y_advvance = field y_advvance "y_advvance" double *)
 
-let () = seal cairo_text_extents_t
+(* let () = seal cairo_text_extents_t *)
 
-let text_extents =
-  foreign "cairo_text_extents"
-    (gpointer @-> string @-> returning cairo_text_extents)
+(* let text_extents = *)
+(*   foreign "cairo_text_extents" *)
+(*     (gpointer @-> string @-> returning (\* cairo_text_extents *\) gpointer) *)
+(*     ~from:libcairo *)
+
+let show_text =
+  foreign "cairo_show_text"
+    (gpointer @-> string @-> returning void)
     ~from:libcairo
 
-(* type timeval *)
-(* let timeval : timeval structure typ = structure "timeval" *)
-(* let tv_sec  = field timeval "tv_sec" long  *)
-(* let tv_usec = field timeval "tv_usec" long  *)
-(* let () = seal timeval *)
+let move_to =
+  foreign "cairo_move_to"
+    (gpointer @-> double @-> double @-> returning void)
+    ~from:libcairo
 
 let cairo_draw_func _area cr _width _height _data =
   set_source_rgb cr 0.9 0.0 0.0 ;
   paint cr ;
-  ()
+  set_source_rgb cr 0.0 0.0 0.0 ;
+  select_font_face cr "DejaVu Sans" 0 0 ;
+  set_font_size cr 21.2 ;
+  let text_string = "OCaml" in
+  (* let _te = text_extents cr "a" in *)
+  move_to cr 10.0 20.0 ; show_text cr text_string ; ()
 (* select_font_face cr "DejaVu Sans" ~weight:Bold ; *)
 (* set_font_size cr 1.2 ; *)
 (* let te = text_extents cr "a" in *)
