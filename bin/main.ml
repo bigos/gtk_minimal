@@ -109,6 +109,48 @@ let set_source_rgb =
 
 let paint = foreign "cairo_paint" (gpointer @-> returning void) ~from:libcairo
 
+let select_font_face =
+  foreign "cairo_select_font_face"
+    (gpointer @-> string @-> int @-> int @-> returning void)
+    ~from:libcairo
+
+let set_font_size =
+  foreign "cairo_set_font_size"
+    (gpointer @-> double @-> returning void)
+    ~from:libcairo
+
+(* this may be wrong  *)
+
+type cairo_text_extents_t
+
+let cairo_text_extents_t : cairo_text_extents_t structure typ =
+  structure "cairo_text_extents_t"
+
+let x_bearing = field x_bearing "x_bearing" double
+
+let y_bearing = field y_bearing "y_bearing" double
+
+let width = field width "width" double
+
+let height = field height "height" double
+
+let x_advvance = field x_advvance "x_advvance" double
+
+let y_advvance = field y_advvance "y_advvance" double
+
+let () = seal cairo_text_extents_t
+
+let text_extents =
+  foreign "cairo_text_extents"
+    (gpointer @-> string @-> returning cairo_text_extents)
+    ~from:libcairo
+
+(* type timeval *)
+(* let timeval : timeval structure typ = structure "timeval" *)
+(* let tv_sec  = field timeval "tv_sec" long  *)
+(* let tv_usec = field timeval "tv_usec" long  *)
+(* let () = seal timeval *)
+
 let cairo_draw_func _area cr _width _height _data =
   set_source_rgb cr 0.9 0.0 0.0 ;
   paint cr ;
