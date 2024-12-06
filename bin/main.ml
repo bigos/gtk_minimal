@@ -166,21 +166,11 @@ let cairo_draw_func _area cr _width _height _data =
   let text_string = "OCaml is centered" in
   let tc = addr (make cairo_text_extents_t) in
   text_extents cr text_string tc ;
-  (* sorry, but it did not work *)
   let twidth = !@(tc |-> width) in
   let theight = !@(tc |-> height) in
-  (* let txbearing = !@(tc |-> x_bearing) in *)
-  (* let tybearing = !@(tc |-> y_bearing) in *)
   move_to cr ((600. /. 2.) -. (twidth /. 2.)) ((400.0 /. 2.) -. (theight /. 2.)) ;
   show_text cr text_string ;
   ()
-(* select_font_face cr "DejaVu Sans" ~weight:Bold ; *)
-(* set_font_size cr 1.2 ; *)
-(* let te = text_extents cr "a" in *)
-(* move_to cr *)
-(*   (0.5 -. (te.width /. 2.) -. te.x_bearing) *)
-(*   (0.5 -. (te.height /. 2.) -. te.y_bearing) ; *)
-(* show_text cr "a" *)
 
 let drawing_area_set_draw_func =
   foreign "gtk_drawing_area_set_draw_func"
