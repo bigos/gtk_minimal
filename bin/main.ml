@@ -165,7 +165,10 @@ let cairo_draw_func _area cr _width _height _data =
   set_font_size cr 21.2 ;
   let text_string = "OCaml" in
   let tc = text_extents cr "a" in
-  move_to cr (tc.width /. 2.0) (tc.height /. 2.0) ;
+  (* sorry, but it did not work *)
+  let twidth = !@(tc |-> width) in
+  let theight = !@(tc |-> height) in
+  move_to cr (twidth /. 2.0) (theight /. 2.0) ;
   show_text cr text_string ;
   ()
 (* select_font_face cr "DejaVu Sans" ~weight:Bold ; *)
