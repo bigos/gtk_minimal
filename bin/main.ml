@@ -127,24 +127,24 @@ let cairo_text_extents_t : cairo_text_extents_t structure typ =
   structure "cairo_text_extents_t"
 
 (* how do I define the structure elements  *)
-let x_bearing = field cairo_text_extents_t "x_bearing" double
+let _x_bearing = field cairo_text_extents_t "x_bearing" double
 
-let y_bearing = field cairo_text_extents_t "y_bearing" double
+let _y_bearing = field cairo_text_extents_t "y_bearing" double
 
 let width = field cairo_text_extents_t "width" double
 
 let height = field cairo_text_extents_t "height" double
 
-let x_advvance = field cairo_text_extents_t "x_advvance" double
+let _x_advvance = field cairo_text_extents_t "x_advvance" double
 
-let y_advvance = field cairo_text_extents_t "y_advvance" double
+let _y_advvance = field cairo_text_extents_t "y_advvance" double
 
 (* tell ctypes that there are no more fields to come *)
 let () = seal cairo_text_extents_t
 
 let text_extents =
   foreign "cairo_text_extents"
-    (gpointer @-> string @-> returning cairo_text_extents_t)
+    (gpointer @-> string @-> ptr cairo_text_extents_t @-> returning void)
     ~from:libcairo
 
 let show_text =
@@ -163,12 +163,15 @@ let cairo_draw_func _area cr _width _height _data =
   set_source_rgb cr 0.0 0.0 0.0 ;
   select_font_face cr "DejaVu Sans" 0 0 ;
   set_font_size cr 21.2 ;
-  let text_string = "OCaml" in
-  let tc = text_extents cr "a" in
+  let text_string = "OCaml is centered" in
+  let tc = addr (make cairo_text_extents_t) in
+  text_extents cr text_string tc ;
   (* sorry, but it did not work *)
   let twidth = !@(tc |-> width) in
   let theight = !@(tc |-> height) in
-  move_to cr (twidth /. 2.0) (theight /. 2.0) ;
+  (* let txbearing = !@(tc |-> x_bearing) in *)
+  (* let tybearing = !@(tc |-> y_bearing) in *)
+  move_to cr ((600. /. 2.) -. (twidth /. 2.)) ((400.0 /. 2.) -. (theight /. 2.)) ;
   show_text cr text_string ;
   ()
 (* select_font_face cr "DejaVu Sans" ~weight:Bold ; *)
