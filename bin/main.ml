@@ -69,7 +69,7 @@ let object_unref =
 
 let signal_connect app s cb p =
   foreign "g_signal_connect_data"
-    ( application @-> string @-> funptr callback_t @-> gpointer @-> gpointer
+    ( gpointer @-> string @-> funptr callback_t @-> gpointer @-> gpointer
     @-> int @-> returning void )
     app s cb p null 0 ~from:libgobject
 
@@ -190,12 +190,14 @@ let widget_add_controller =
     (widget @-> gpointer @-> returning void)
     ~from:libgtk
 
+(* finish the following *)
+let key_pressed_func _ev _args = ()
+
 let window_events window =
-  (* finish me *)
   let key_controller = event_controller_key_new () in
   widget_add_controller window key_controller ;
   (* finish me *)
-  connect key_controller "key_pressed" lambda_of_the_event ;
+  signal_connect key_controller "key_pressed" key_pressed_func null ;
   ()
 
 let canvas_events _canvas =
