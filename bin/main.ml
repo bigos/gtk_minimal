@@ -119,8 +119,6 @@ let set_font_size =
     (gpointer @-> double @-> returning void)
     ~from:libcairo
 
-(* this may be wrong  *)
-
 type cairo_text_extents_t
 
 let cairo_text_extents_t : cairo_text_extents_t structure typ =
@@ -182,6 +180,16 @@ let drawing_area_set_draw_func =
     @-> gpointer @-> gpointer @-> returning void )
     ~from:libgtk
 
+(* events *)
+let window_events _window =
+  (* finish me *)
+  ()
+
+let canvas_events _canvas =
+  (* finsh me *)
+  ()
+
+(* activation *)
 let activate : application -> gpointer -> unit =
  fun app _data ->
   let win = gtk_application_window_new app in
@@ -193,11 +201,10 @@ let activate : application -> gpointer -> unit =
   let canvas = drawing_area_new () in
   widget_set_vexpand canvas true ;
   drawing_area_set_draw_func canvas cairo_draw_func null null ;
-  (* set canvas events *)
+  canvas_events canvas ;
   box_append box canvas ;
-  (* set box as child of win *)
   window_set_child win box ;
-  (* set win events *)
+  window_events win ;
   window_present win
 
 let main () =
