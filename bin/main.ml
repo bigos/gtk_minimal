@@ -181,8 +181,21 @@ let drawing_area_set_draw_func =
     ~from:libgtk
 
 (* events *)
-let window_events _window =
+
+let event_controller_key_new =
+  foreign "gtk_controller_key_new" (void @-> returning gpointer) ~from:libgtk
+
+let widget_add_controller =
+  foreign "gtk_widget_add_controller"
+    (widget @-> gpointer @-> returning void)
+    ~from:libgtk
+
+let window_events window =
   (* finish me *)
+  let key_controller = event_controller_key_new () in
+  widget_add_controller window key_controller ;
+  (* finish me *)
+  connect key_controller "key_pressed" lambda_of_the_event ;
   ()
 
 let canvas_events _canvas =
