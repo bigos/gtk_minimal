@@ -193,7 +193,8 @@ let widget_add_controller =
     ~from:libgtk
 
 (* finish the following *)
-let key_pressed_func _ev _args = ()
+let key_pressed_func _ev _args = print_endline "KKKKKKK" ; ()
+(* Printf.printf "key event" ; () *)
 
 let window_events window =
   let key_controller = event_controller_key_new () in
