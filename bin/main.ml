@@ -183,7 +183,9 @@ let drawing_area_set_draw_func =
 (* events *)
 
 let event_controller_key_new =
-  foreign "gtk_controller_key_new" (void @-> returning gpointer) ~from:libgtk
+  foreign "gtk_event_controller_key_new"
+    (void @-> returning gpointer)
+    ~from:libgtk
 
 let widget_add_controller =
   foreign "gtk_widget_add_controller"
