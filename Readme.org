@@ -14,7 +14,13 @@ opam exec -- emacs &
 opam exec --  dune build
 #+end_example
 
-** Question
-Is it possible to use cairo2 library here?
+** Giving up on OCaml
+While OCaml seems to promise certain advantages I did not have much success.
 
-If it is possible how do I use cr in main.ml in the function  cairo_draw_func ?
+I am huge fan of dynamic typed languages and can't be convinced with static languages.
+
+Id rather spend hours trying to figure out a bug in dynamic language than spend
+frustrating hours where static language won't compile, infuriate me with cryptic
+errors or won't provide me with the information needed to solve the problem.
+
+I may come back now and then, but now I had enough!
