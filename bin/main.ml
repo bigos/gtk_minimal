@@ -193,10 +193,9 @@ let widget_add_controller =
     ~from:libgtk
 
 (* finish the following *)
-let key_pressed_func _ev _args = print_endline "KKKKKKK" ; ()
-(* Printf.printf "key event" ; () *)
+let key_pressed_func = fun _ev _args -> print_endline "Key" ; ()
 
-let window_events window =
+let window_events _app window =
   let key_controller = event_controller_key_new () in
   widget_add_controller window key_controller ;
   (* finish me *)
@@ -222,7 +221,7 @@ let activate : application -> gpointer -> unit =
   canvas_events canvas ;
   box_append box canvas ;
   window_set_child win box ;
-  window_events win ;
+  window_events app win ;
   window_present win
 
 let main () =
