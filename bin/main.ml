@@ -192,11 +192,22 @@ let widget_add_controller =
     (widget @-> gpointer @-> returning void)
     ~from:libgtk
 
+let get_keyval =
+  foreign "gdk_key_event_get_keyval" (gpointer @-> returning int) ~from:libgtk
+
+(* Events
+  https://docs.gtk.org/gdk4/class.Event.html
+  https://docs.gtk.org/gdk4/keys.html
+  https://docs.gtk.org/gdk4/class.KeyEvent.html
+  https://docs.gtk.org/gdk4/method.KeyEvent.get_keyval.html
+ *)
+
 (* finish the following *)
-let key_pressed_func : application -> gpointer -> unit =
- fun _ev args ->
+let key_pressed_func : gpointer -> gpointer -> unit =
+ (* while it compiles and runs, the ev is not the event *)
+ fun ev _args ->
   print_endline "Key" ;
-  Printf.printf "%x" (Obj.magic args) ;
+  Printf.printf "%x" (get_keyval ev) ;
   ()
 
 let window_events _app window =
