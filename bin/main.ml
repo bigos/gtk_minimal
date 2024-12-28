@@ -194,9 +194,9 @@ let widget_add_controller =
 
 (* finish the following *)
 let key_pressed_func : application -> gpointer -> unit =
- fun ev args ->
+ fun _ev args ->
   print_endline "Key" ;
-  Printf.printf " %x - %x" ev args ;
+  Printf.printf "%x" (Obj.magic args) ;
   ()
 
 let window_events _app window =
