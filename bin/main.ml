@@ -34,11 +34,6 @@ type gpointer = unit ptr
 
 let gpointer : gpointer typ = ptr void
 
-let callback_t = application @-> gpointer @-> returning void
-
-let callback_key_pressed =
-  gpointer @-> int @-> int @-> int @-> gpointer @-> returning void
-
 let gtk_application_new =
   foreign "gtk_application_new"
     (string @-> int @-> returning application)
@@ -70,16 +65,17 @@ let application_run =
 let object_unref =
   foreign "g_object_unref" (gpointer @-> returning void) ~from:libgobject
 
-let signal_connect app s cb p =
+let signal_connect_activate app s cb p =
   foreign "g_signal_connect_data"
-    ( gpointer @-> string @-> funptr callback_t @-> gpointer @-> gpointer
-    @-> int @-> returning void )
+    ( gpointer @-> string
+    @-> funptr (application @-> gpointer @-> returning void)
+    @-> gpointer @-> gpointer @-> int @-> returning void )
     app s cb p null 0 ~from:libgobject
 
 let signal_connect_key_pressed w s cb p =
   foreign "g_signal_connect_data"
     ( gpointer @-> string
-    @-> funptr callback_key_pressed
+    @-> funptr (gpointer @-> int @-> int @-> int @-> gpointer @-> returning void)
     @-> gpointer @-> gpointer @-> int @-> returning void )
     w s cb p null 0 ~from:libgobject
 
@@ -239,7 +235,7 @@ let activate : application -> gpointer -> unit =
 
 let main () =
   let app = gtk_application_new "org.gtk.example" 0 in
-  signal_connect app "activate" activate null ;
+  signal_connect_activate app "activate" activate null ;
   let status = application_run app 0 null in
   object_unref app ;
   print_endline @@ string_of_int status
