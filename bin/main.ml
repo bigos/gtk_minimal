@@ -74,7 +74,7 @@ let signal_connect_activate app s cb p =
 
 let signal_connect_key_pressed w s cb p =
   foreign "g_signal_connect_data"
-    ( gpointer @-> string
+    ( widget @-> string
     @-> funptr (gpointer @-> int @-> int @-> int @-> gpointer @-> returning void)
     @-> gpointer @-> gpointer @-> int @-> returning void )
     w s cb p null 0 ~from:libgobject
@@ -199,15 +199,15 @@ let widget_add_controller =
     ~from:libgtk
 
 (* finish the following *)
-let key_pressed_func _w kc _kv _s _z =
-  Printf.printf "key\n %d " kc ;
+let key_pressed_func _w kc kv s _z =
+  Printf.printf "key %d %d %d %c\n" kc kv s
+    (if kc <= 255 then Char.chr kc else Char.chr 64) ;
   Printf.printf "%!" ;
   ()
 
 let window_events _app window =
   let key_controller = event_controller_key_new () in
   widget_add_controller window key_controller ;
-  (* finish me *)
   signal_connect_key_pressed key_controller "key_pressed" key_pressed_func null ;
   ()
 
