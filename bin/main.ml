@@ -216,9 +216,12 @@ let widget_add_controller =
     (widget @-> gpointer @-> returning void)
     ~from:libgtk
 
+(* key names *)
+(* https://gitlab.gnome.org/GNOME/gtk/-/blob/main/gdk/gdkkeysyms.h *)
+
 (* finish the following *)
 let key_pressed_func _w kc kv s _z =
-  Printf.printf "key %d %d %d %c\n" kc kv s
+  Printf.printf "key %x %d %d %d %c\n" kc kc kv s
     (if kc <= 255 then Char.chr kc else Char.chr 64) ;
   Printf.printf "%!" ;
   ()
