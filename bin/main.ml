@@ -36,6 +36,9 @@ let gpointer : gpointer typ = ptr void
 
 let callback_t = application @-> gpointer @-> returning void
 
+let callback_key_pressed =
+  gpointer @-> int @-> int @-> int @-> gpointer @-> returning void
+
 let gtk_application_new =
   foreign "gtk_application_new"
     (string @-> int @-> returning application)
@@ -72,6 +75,13 @@ let signal_connect app s cb p =
     ( gpointer @-> string @-> funptr callback_t @-> gpointer @-> gpointer
     @-> int @-> returning void )
     app s cb p null 0 ~from:libgobject
+
+let signal_connect_key_pressed w s cb p =
+  foreign "g_signal_connect_data"
+    ( gpointer @-> string
+    @-> funptr callback_key_pressed
+    @-> gpointer @-> gpointer @-> int @-> returning void )
+    w s cb p null 0 ~from:libgobject
 
 let window_present =
   foreign "gtk_window_present" (widget @-> returning void) ~from:libgtk
@@ -192,29 +202,17 @@ let widget_add_controller =
     (widget @-> gpointer @-> returning void)
     ~from:libgtk
 
-let get_keyval =
-  foreign "gdk_key_event_get_keyval" (gpointer @-> returning int) ~from:libgtk
-
-(* Events
-  https://docs.gtk.org/gdk4/class.Event.html
-  https://docs.gtk.org/gdk4/keys.html
-  https://docs.gtk.org/gdk4/class.KeyEvent.html
-  https://docs.gtk.org/gdk4/method.KeyEvent.get_keyval.html
- *)
-
 (* finish the following *)
-let key_pressed_func : gpointer -> gpointer -> unit =
- (* while it compiles and runs, the ev is not the event *)
- fun ev _args ->
-  print_endline "Key" ;
-  Printf.printf "%x" (get_keyval ev) ;
+let key_pressed_func _w kc _kv _s _z =
+  Printf.printf "key\n %d " kc ;
+  Printf.printf "%!" ;
   ()
 
 let window_events _app window =
   let key_controller = event_controller_key_new () in
   widget_add_controller window key_controller ;
   (* finish me *)
-  signal_connect key_controller "key_pressed" key_pressed_func null ;
+  signal_connect_key_pressed key_controller "key_pressed" key_pressed_func null ;
   ()
 
 let canvas_events _canvas =
