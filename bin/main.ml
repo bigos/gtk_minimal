@@ -65,17 +65,35 @@ let application_run =
 let object_unref =
   foreign "g_object_unref" (gpointer @-> returning void) ~from:libgobject
 
+(* https://docs.gtk.org/gobject/func.signal_connect_data.html  *)
+(* https://docs.gtk.org/gio/signal.Application.activate.html *)
 let signal_connect_activate app s cb p =
   foreign "g_signal_connect_data"
     ( gpointer @-> string
-    @-> funptr (application @-> gpointer @-> returning void)
+    @-> funptr
+          ( application
+          (* self *)
+          @-> gpointer
+          (* user_data *)
+          @-> returning void )
     @-> gpointer @-> gpointer @-> int @-> returning void )
     app s cb p null 0 ~from:libgobject
 
+(* https://docs.gtk.org/gtk4/class.EventControllerKey.html *)
+(* https://docs.gtk.org/gtk4/signal.EventControllerKey.key-pressed.html *)
 let signal_connect_key_pressed w s cb p =
   foreign "g_signal_connect_data"
     ( widget @-> string
-    @-> funptr (gpointer @-> int @-> int @-> int @-> gpointer @-> returning void)
+    @-> funptr
+          ( gpointer (* self *) @-> int
+          (* keyval *)
+          @-> int
+          (* keycode *)
+          @-> int
+          (* state *)
+          @-> gpointer
+          (* user_data *)
+          @-> returning void )
     @-> gpointer @-> gpointer @-> int @-> returning void )
     w s cb p null 0 ~from:libgobject
 
