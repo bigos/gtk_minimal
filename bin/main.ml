@@ -215,14 +215,31 @@ let widget_add_controller =
   foreign "gtk_widget_add_controller"
     (widget @-> gpointer @-> returning void)
     ~from:libgtk
-
 (* key names *)
 (* https://gitlab.gnome.org/GNOME/gtk/-/blob/main/gdk/gdkkeysyms.h *)
+(* /usr/include/gtk-4.0/gdk/gdkkeysyms.h *)
+
+let gdkkeysyms_file = "/usr/include/gtk-4.0/gdk/gdkkeysyms.h"
+
+(* File.read gdkkeysyms_file *)
+let list_of_codes =
+  In_channel.with_open_text gdkkeysyms_file In_channel.input_lines
+  |> List.filter (fun s -> String.starts_with ~prefix:"#def" s)
+  |> List.map (fun s -> String.split_on_char (Char.chr 32) s)
+  |> List.map (fun sl -> List.tl sl)
+
+let find_code str =
+  let lc = list_of_codes in
+  List.filter (fun pl -> String.equal str (List.nth pl 1)) lc
 
 (* finish the following *)
 let key_pressed_func _w kc kv s _z =
-  Printf.printf "key %x %d %d %d %c\n" kc kc kv s
-    (if kc <= 255 then Char.chr kc else Char.chr 64) ;
+  let kc_name = find_code (Printf.sprintf "%x" kc) in
+  (* |> List.hd |> List.hd in *)
+  (* need to finfd how to handle exceptions *)
+  Printf.printf "key %x %d %d %d %c %s\n" kc kc kv s
+    (if kc <= 255 then Char.chr kc else Char.chr 64)
+    kc_name ;
   Printf.printf "%!" ;
   ()
 
