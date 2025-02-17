@@ -234,8 +234,10 @@ let find_code str =
 
 (* finish the following *)
 let key_pressed_func _w kc kv s _z =
-  let kc_name = find_code (Printf.sprintf "%x" kc) in
-  (* |> List.hd |> List.hd in *)
+  let kc_name =
+    try find_code (Printf.sprintf "0x%x" kc) |> List.hd |> List.hd
+    with _ -> "nnn"
+  in
   (* need to finfd how to handle exceptions *)
   Printf.printf "key %x %d %d %d %c %s\n" kc kc kv s
     (if kc <= 255 then Char.chr kc else Char.chr 64)
