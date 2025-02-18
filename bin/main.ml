@@ -1,6 +1,6 @@
 (*
    Select both lines and do C-c C-r to paste them into REPL
-    #cd "/home/jacek/Programming/OCaml/ocaml_experiments/gtk_minimal";;
+    #cd "/home/jacek/Programming/OCaml/gtk_minimal/";;
     #use ".ocamlinit";;
   You can do C-c C-b to evaluate the whole buffer or select the following line
   and doing C-c C-r
