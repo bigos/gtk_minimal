@@ -215,14 +215,14 @@ let widget_add_controller =
   foreign "gtk_widget_add_controller"
     (widget @-> gpointer @-> returning void)
     ~from:libgtk
+
 (* key names *)
 (* https://gitlab.gnome.org/GNOME/gtk/-/blob/main/gdk/gdkkeysyms.h *)
 (* /usr/include/gtk-4.0/gdk/gdkkeysyms.h *)
 
-let gdkkeysyms_file = "/usr/include/gtk-4.0/gdk/gdkkeysyms.h"
-
 (* because no parameter is passed this is global and executed once *)
 let list_of_codes =
+  let gdkkeysyms_file = "/usr/include/gtk-4.0/gdk/gdkkeysyms.h" in
   In_channel.with_open_text gdkkeysyms_file In_channel.input_lines
   |> List.filter (fun s -> String.starts_with ~prefix:"#def" s)
   |> List.map (fun s -> String.split_on_char (Char.chr 32) s)
@@ -233,9 +233,8 @@ let find_code kc =
   let lc = list_of_codes in
   List.filter (fun (_a, b) -> b == kc) lc
 
-let kc_value kc = if kc <= 255 then String.make 1 (Char.chr kc) else ""
-
 let key_pressed_func _w kc kv s _z =
+  let kc_value kc = if kc <= 255 then String.make 1 (Char.chr kc) else "" in
   let kc_name =
     try find_code kc |> List.hd |> fun (a, _b) -> a with _ -> kc_value kc
   in
