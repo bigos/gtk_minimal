@@ -237,11 +237,9 @@ let kc_value kc = if kc <= 255 then String.make 1 (Char.chr kc) else ""
 
 let key_pressed_func _w kc kv s _z =
   let kc_name =
-    try find_code kc |> List.hd |> fun (a, _b) -> a
-    with _ ->
-      if kc <= 255 then String.make 1 (Char.chr kc) else "unexpected situation"
+    try find_code kc |> List.hd |> fun (a, _b) -> a with _ -> kc_value kc
   in
-  Printf.printf "key kc 0x%x %d kv %d s %d  %s %s\n" kc kc kv s kc_name
+  Printf.printf "key kc 0x%x %d kv %d s %d  %s '%s'\n" kc kc kv s kc_name
     (kc_value kc) ;
   Printf.printf "%!" ;
   ()
