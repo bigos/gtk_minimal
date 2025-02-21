@@ -221,23 +221,24 @@ let widget_add_controller =
 (* /usr/include/gtk-4.0/gdk/gdkkeysyms.h *)
 
 (* because no parameter is passed this is global and executed once *)
-let list_of_codes =
+let codes =
   let gdkkeysyms_file = "/usr/include/gtk-4.0/gdk/gdkkeysyms.h" in
-  In_channel.with_open_text gdkkeysyms_file In_channel.input_lines
-  |> List.filter (fun s -> String.starts_with ~prefix:"#def" s)
-  |> List.map (fun s -> String.split_on_char (Char.chr 32) s)
-  |> List.map (fun sl -> List.tl sl)
-  |> List.map (fun a -> (List.nth a 0, int_of_string (List.nth a 1)))
+  let ht = Hashtbl.create 2300 in
+  let _gethered_codes =
+    In_channel.with_open_text gdkkeysyms_file In_channel.input_lines
+    |> List.filter (fun s -> String.starts_with ~prefix:"#def" s)
+    |> List.map (fun s -> String.split_on_char (Char.chr 32) s)
+    |> List.map (fun sl -> List.tl sl)
+    |> List.map (fun a -> (List.nth a 0, int_of_string (List.nth a 1)))
+    |> List.map (fun (v, k) -> Hashtbl.add ht k v)
+  in
+  ht
 
-let find_code kc =
-  let lc = list_of_codes in
-  List.filter (fun (_a, b) -> b == kc) lc
+let find_code kc = Hashtbl.find codes kc
 
 let key_pressed_func _w kc kv s _z =
   let kc_value kc = if kc <= 255 then String.make 1 (Char.chr kc) else "" in
-  let kc_name =
-    try find_code kc |> List.hd |> fun (a, _b) -> a with _ -> kc_value kc
-  in
+  let kc_name = find_code kc in
   Printf.printf "key kc 0x%x %d kv %d s %d  %s '%s'\n" kc kc kv s kc_name
     (kc_value kc) ;
   Printf.printf "%!" ;
