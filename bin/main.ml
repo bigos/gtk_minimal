@@ -231,6 +231,7 @@ let codes =
     |> List.map (fun a ->
            Hashtbl.add ht (int_of_string (List.nth a 2)) (List.nth a 1) )
   in
+  Printf.printf "creating key codes hash should be done once\n" ;
   ht
 
 let find_code kc = Hashtbl.find codes kc
