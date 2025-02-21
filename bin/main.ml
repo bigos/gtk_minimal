@@ -224,13 +224,12 @@ let widget_add_controller =
 let codes =
   let gdkkeysyms_file = "/usr/include/gtk-4.0/gdk/gdkkeysyms.h" in
   let ht = Hashtbl.create 2300 in
-  let _gethered_codes =
+  let _gathered_codes =
     In_channel.with_open_text gdkkeysyms_file In_channel.input_lines
     |> List.filter (fun s -> String.starts_with ~prefix:"#def" s)
     |> List.map (fun s -> String.split_on_char (Char.chr 32) s)
-    |> List.map (fun sl -> List.tl sl)
-    |> List.map (fun a -> (List.nth a 0, int_of_string (List.nth a 1)))
-    |> List.map (fun (v, k) -> Hashtbl.add ht k v)
+    |> List.map (fun a ->
+           Hashtbl.add ht (int_of_string (List.nth a 2)) (List.nth a 1) )
   in
   ht
 
