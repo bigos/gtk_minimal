@@ -273,6 +273,7 @@ let window_events _app window =
    *)
   ()
 
+(* https://docs.gtk.org/gtk4/signal.DrawingArea.resize.html *)
 let resize_func _w width height _ud =
   Printf.printf "resizing %d %d\n" width height ;
   Printf.printf "%!" ;
@@ -285,7 +286,7 @@ let canvas_events canvas =
     motion, enter, leave, scroll
     clicks: pressed and released
     notify and resize
-    https://docs.gtk.org/gtk4/signal.DrawingArea.resize.html
+
    *)
   ()
 
