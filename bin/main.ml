@@ -67,8 +67,6 @@ let application_run =
 let object_unref =
   foreign "g_object_unref" (gpointer @-> returning void) ~from:libgobject
 
-(* Fatal error: exception Dl.DL_error("/lib/x86_64-linux-gnu/libglib-2.0.so.0: undefined symbol: timeout_add") *)
-
 (* https://docs.gtk.org/gtk4/signal.DrawingArea.resize.html *)
 let signal_connect_resize widget s cb p =
   foreign "g_signal_connect_data"
@@ -98,8 +96,6 @@ let signal_connect_activate app s cb p =
           @-> returning void )
     @-> gpointer @-> gpointer @-> int @-> returning void )
     app s cb p null 0 ~from:libgobject
-
-(* https://docs.gtk.org/glib/func.timeout_add.html *)
 
 (* https://docs.gtk.org/gtk4/class.EventControllerKey.html *)
 (* https://docs.gtk.org/gtk4/signal.EventControllerKey.key-pressed.html
