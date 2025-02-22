@@ -119,16 +119,16 @@ let signal_connect_key_x w s cb p =
 
 (* https://docs.gtk.org/gtk4/signal.EventControllerFocus.enter.html *)
 
-let signal_connect_enter w s cb p =
+let signal_connect_motion_enter w s cb p =
   foreign "g_signal_connect_data"
     ( widget @-> string
-    @-> funptr (gpointer @-> gpointer @-> returning void)
+    @-> funptr (gpointer @-> int @-> int @-> gpointer @-> returning void)
     @-> gpointer @-> gpointer @-> int @-> returning void )
     w s cb p null 0 ~from:libgobject
 
 (* https://docs.gtk.org/gtk4/signal.EventControllerFocus.leave.html *)
 
-let signal_connect_leave w s cb p =
+let signal_connect_motion_leave w s cb p =
   foreign "g_signal_connect_data"
     ( widget @-> string
     @-> funptr (gpointer @-> gpointer @-> returning void)
@@ -263,6 +263,11 @@ let event_controller_focus_new =
     (void @-> returning gpointer)
     ~from:libgtk
 
+let event_controller_motion_new =
+  foreign "gtk_event_controller_motion_new"
+    (void @-> returning gpointer)
+    ~from:libgtk
+
 let widget_add_controller =
   foreign "gtk_widget_add_controller"
     (widget @-> gpointer @-> returning void)
@@ -304,9 +309,18 @@ let key_released_func _w kc kv s _z =
   Printf.printf "%!" ;
   ()
 
-let enter_func _a _b = Printf.printf "enter %!" ; ()
+(* why enter and motion gie 0 coordinates??? *)
+let motion_func _a x y _b =
+  Printf.printf "motion %d %d\n" x y ;
+  Printf.printf "%!" ;
+  ()
 
-let leave_func _a _b = Printf.printf "leave %!" ; ()
+let enter_func _a x y _b =
+  Printf.printf "enter %d %d\n" x y ;
+  Printf.printf "%!" ;
+  ()
+
+let leave_func _a _b = Printf.printf "leave\n" ; Printf.printf "%!" ; ()
 
 (* enter and leave events do not work
    https://docs.gtk.org/gtk4/signal.EventControllerFocus.enter.html *)
@@ -315,12 +329,15 @@ let leave_func _a _b = Printf.printf "leave %!" ; ()
 let window_events _app window =
   let key_controller = event_controller_key_new () in
   let focus_controller = event_controller_focus_new () in
+  let motion_controller = event_controller_motion_new () in
   widget_add_controller window key_controller ;
   widget_add_controller window focus_controller ;
+  widget_add_controller window motion_controller ;
   signal_connect_key_x key_controller "key-pressed" key_pressed_func null ;
   signal_connect_key_x key_controller "key-released" key_released_func null ;
-  signal_connect_enter focus_controller "enter" enter_func null ;
-  signal_connect_leave focus_controller "leave" leave_func null ;
+  signal_connect_motion_enter motion_controller "motion" motion_func null ;
+  signal_connect_motion_enter motion_controller "enter" enter_func null ;
+  signal_connect_motion_leave motion_controller "leave" leave_func null ;
   ()
 (* add focus-controller: enter and leave
 
