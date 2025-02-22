@@ -65,6 +65,22 @@ let application_run =
 let object_unref =
   foreign "g_object_unref" (gpointer @-> returning void) ~from:libgobject
 
+(* https://docs.gtk.org/gtk4/signal.DrawingArea.resize.html *)
+let signal_connect_resize widget s cb p =
+  foreign "g_signal_connect_data"
+    ( gpointer @-> string
+    @-> funptr
+          ( gpointer
+          (* self *)
+          @-> int
+          (* width *)
+          @-> int (* height *)
+          @-> gpointer
+          (* user_data *)
+          @-> returning void )
+    @-> gpointer @-> gpointer @-> int @-> returning void )
+    widget s cb p null 0 ~from:libgobject
+
 (* https://docs.gtk.org/gobject/func.signal_connect_data.html  *)
 (* https://docs.gtk.org/gio/signal.Application.activate.html *)
 let signal_connect_activate app s cb p =
@@ -249,20 +265,27 @@ let window_events _app window =
   let key_controller = event_controller_key_new () in
   widget_add_controller window key_controller ;
   signal_connect_key_pressed key_controller "key-pressed" key_pressed_func null ;
-  signal_connect_key_released key_controller "key-released" key_released_func
-    null ;
+  (* signal_connect_key_released key_controller "key-released" key_released_func null *)
   (* add focus-controller: enter and leave
      timeout
      handling of close request
+     https://docs.gtk.org/gtk4/signal.Window.close-request.html
    *)
   ()
 
-let canvas_events _canvas =
+let resize_func _w width height _ud =
+  Printf.printf "resizing %d %d\n" width height ;
+  Printf.printf "%!" ;
+  ()
+
+let canvas_events canvas =
+  signal_connect_resize canvas "resize" resize_func null ;
   (* finsh me *)
   (*
     motion, enter, leave, scroll
     clicks: pressed and released
     notify and resize
+    https://docs.gtk.org/gtk4/signal.DrawingArea.resize.html
    *)
   ()
 
