@@ -16,6 +16,8 @@ let libgio = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libgio-2.0.so"
 
 let libgobject = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libgobject-2.0.so"
 
+let libglib = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libglib-2.0.so"
+
 let libcairo = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libcairo.so.2"
 
 type window = unit ptr
@@ -95,11 +97,13 @@ let signal_connect_activate app s cb p =
     @-> gpointer @-> gpointer @-> int @-> returning void )
     app s cb p null 0 ~from:libgobject
 
+(* https://docs.gtk.org/glib/func.timeout_add.html *)
+
 (* https://docs.gtk.org/gtk4/class.EventControllerKey.html *)
 (* https://docs.gtk.org/gtk4/signal.EventControllerKey.key-pressed.html
    https://docs.gtk.org/gtk4/signal.EventControllerKey.key-released.html
  *)
-let signal_connect_key_pressed w s cb p =
+let signal_connect_key_x w s cb p =
   foreign "g_signal_connect_data"
     ( widget @-> string
     @-> funptr
@@ -274,9 +278,9 @@ let key_released_func _w kc kv s _z =
 let window_events _app window =
   let key_controller = event_controller_key_new () in
   widget_add_controller window key_controller ;
-  signal_connect_key_pressed key_controller "key-pressed" key_pressed_func null ;
-  (* I can use the same signal connect key because signatures are identical   *)
-  signal_connect_key_pressed key_controller "key-released" key_released_func
+  signal_connect_key_x key_controller "key-pressed" key_pressed_func null ;
+  signal_connect_key_x key_controller "key-released"
+    (fun w kc kv s z -> key_released_func w kc kv s z)
     null ;
   (* add focus-controller: enter and leave
      timeout
