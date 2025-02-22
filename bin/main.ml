@@ -118,6 +118,20 @@ let signal_connect_key_x w s cb p =
     w s cb p null 0 ~from:libgobject
 
 (* https://docs.gtk.org/gtk4/signal.EventControllerFocus.enter.html *)
+(* https://docs.gtk.org/gtk4/signal.EventControllerFocus.leave.html *)
+let signal_connect_focus_enter w s cb p =
+  foreign "g_signal_connect_data"
+    ( widget @-> string
+    @-> funptr (gpointer @-> gpointer @-> returning void)
+    @-> gpointer @-> gpointer @-> int @-> returning void )
+    w s cb p null 0 ~from:libgobject
+
+let signal_connect_focus_leave w s cb p =
+  foreign "g_signal_connect_data"
+    ( widget @-> string
+    @-> funptr (gpointer @-> gpointer @-> returning void)
+    @-> gpointer @-> gpointer @-> int @-> returning void )
+    w s cb p null 0 ~from:libgobject
 
 let signal_connect_motion_enter w s cb p =
   foreign "g_signal_connect_data"
@@ -125,8 +139,6 @@ let signal_connect_motion_enter w s cb p =
     @-> funptr (gpointer @-> int @-> int @-> gpointer @-> returning void)
     @-> gpointer @-> gpointer @-> int @-> returning void )
     w s cb p null 0 ~from:libgobject
-
-(* https://docs.gtk.org/gtk4/signal.EventControllerFocus.leave.html *)
 
 let signal_connect_motion_leave w s cb p =
   foreign "g_signal_connect_data"
@@ -322,6 +334,16 @@ let enter_func _a x y _b =
 
 let leave_func _a _b = Printf.printf "leave\n" ; Printf.printf "%!" ; ()
 
+let focus_enter_func _a _b =
+  Printf.printf "focus enter\n" ;
+  Printf.printf "%!" ;
+  ()
+
+let focus_leave_func _a _b =
+  Printf.printf "focus leave\n" ;
+  Printf.printf "%!" ;
+  ()
+
 (* enter and leave events do not work
    https://docs.gtk.org/gtk4/signal.EventControllerFocus.enter.html *)
 
@@ -335,9 +357,13 @@ let window_events _app window =
   widget_add_controller window motion_controller ;
   signal_connect_key_x key_controller "key-pressed" key_pressed_func null ;
   signal_connect_key_x key_controller "key-released" key_released_func null ;
+  (* all motions have zero coordinates *)
   signal_connect_motion_enter motion_controller "motion" motion_func null ;
   signal_connect_motion_enter motion_controller "enter" enter_func null ;
   signal_connect_motion_leave motion_controller "leave" leave_func null ;
+  (* focus does not work *)
+  signal_connect_focus_enter focus_controller "enter" focus_enter_func null ;
+  signal_connect_focus_leave focus_controller "leave" focus_leave_func null ;
   ()
 (* add focus-controller: enter and leave
 
