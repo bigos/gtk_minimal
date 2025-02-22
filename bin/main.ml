@@ -244,14 +244,26 @@ let key_pressed_func _w kc kv s _z =
   Printf.printf "%!" ;
   ()
 
+(* file:~/Programming/Lisp/clops-gui/src/gui-window-gtk.lisp::71 *)
 let window_events _app window =
   let key_controller = event_controller_key_new () in
   widget_add_controller window key_controller ;
-  signal_connect_key_pressed key_controller "key_pressed" key_pressed_func null ;
+  signal_connect_key_pressed key_controller "key-pressed" key_pressed_func null ;
+  signal_connect_key_released key_controller "key-released" key_released_func
+    null ;
+  (* add focus-controller: enter and leave
+     timeout
+     handling of close request
+   *)
   ()
 
 let canvas_events _canvas =
   (* finsh me *)
+  (*
+    motion, enter, leave, scroll
+    clicks: pressed and released
+    notify and resize
+   *)
   ()
 
 (* activation *)
