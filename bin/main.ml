@@ -69,15 +69,6 @@ let object_unref =
 
 (* Fatal error: exception Dl.DL_error("/lib/x86_64-linux-gnu/libglib-2.0.so.0: undefined symbol: timeout_add") *)
 
-(* https://docs.gtk.org/glib/func.timeout_add.html *)
-(* let timeout_add = *)
-(*   foreign "timeout_add" *)
-(*     ( int *)
-(*     (\* interval *\) *)
-(*     @-> funptr (gpointer @-> returning bool) *)
-(*     @-> gpointer (\* data *\) @-> returning int ) *)
-(*     ~from:libglib *)
-
 (* https://docs.gtk.org/gtk4/signal.DrawingArea.resize.html *)
 let signal_connect_resize widget s cb p =
   foreign "g_signal_connect_data"
@@ -287,9 +278,6 @@ let key_released_func _w kc kv s _z =
 
 (* file:~/Programming/Lisp/clops-gui/src/gui-window-gtk.lisp::71 *)
 let window_events _app window =
-  (* let _tt = *)
-  (*   timeout_add 1000 (fun _w -> Printf.printf "timeout %!" ; true) null *)
-  (* in *)
   let key_controller = event_controller_key_new () in
   widget_add_controller window key_controller ;
   signal_connect_key_x key_controller "key-pressed" key_pressed_func null ;
@@ -298,7 +286,7 @@ let window_events _app window =
     null ;
   ()
 (* add focus-controller: enter and leave
-     timeout
+
      handling of close request
      https://docs.gtk.org/gtk4/signal.Window.close-request.html
    *)
