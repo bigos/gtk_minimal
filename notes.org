@@ -99,4 +99,16 @@ window creation, canvas and events
 [[file:~/Programming/Lisp/clops-gui/src/gui-window-gtk.lisp::(defun new-window-for-app]]
 
 ** OCaml discuss
+https://discuss.ocaml.org/
+
+*** How do I write minesweeper game in OCaml?
 https://discuss.ocaml.org/t/how-do-i-write-minesweeper-game-in-ocaml/16165/5
+
+https://ocaml.org/docs
+
+https://ocaml.org/manual/5.3/api/Array.html
+https://ocaml.org/manual/5.3/api/Map.html
+https://ocaml.org/manual/5.3/api/Hashtbl.html
+
+https://github.com/rossberg/boulder-dash
+https://github.com/aryx/ocaml-elm-playground
