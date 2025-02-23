@@ -133,6 +133,16 @@ let signal_connect_motion_leave w s cb p =
     @-> funptr (gpointer @-> gpointer @-> returning void)
     @-> gpointer @-> gpointer @-> int @-> returning void )
     w s cb p null 0 ~from:libgobject
+
+(* https://docs.gtk.org/gtk4/signal.EventControllerScroll.scroll.html *)
+
+let signal_connect_scroll w s cb p =
+  foreign "g_signal_connect_data"
+    ( widget @-> string
+    @-> funptr (gpointer @-> double @-> double @-> gpointer @-> returning void)
+    @-> gpointer @-> gpointer @-> int @-> returning void )
+    w s cb p null 0 ~from:libgobject
+
 (*
 let signal_connect_next-to-do w s cb p =
   foreign "g_signal_connect_data"
@@ -262,6 +272,11 @@ let event_controller_motion_new =
     (void @-> returning gpointer)
     ~from:libgtk
 
+let event_controller_scroll_new =
+  foreign "gtk_event_controller_scroll_new"
+    (int @-> returning gpointer)
+    ~from:libgtk
+
 let widget_add_controller =
   foreign "gtk_widget_add_controller"
     (widget @-> gpointer @-> returning void)
@@ -334,18 +349,26 @@ let resize_func _w width height _ud =
   Printf.printf "%!" ;
   ()
 
+let scroll_func _w dx dy _ud =
+  Printf.printf "scrolling %f %f\n" dx dy ;
+  Printf.printf "%!" ;
+  ()
+
 let canvas_events canvas =
   let motion_controller = event_controller_motion_new () in
+  let scroll_controller = event_controller_scroll_new 1 in
   widget_add_controller canvas motion_controller ;
+  widget_add_controller canvas scroll_controller ;
   signal_connect_motion_enter motion_controller "motion" motion_func null ;
   signal_connect_motion_enter motion_controller "enter" enter_func null ;
   signal_connect_motion_leave motion_controller "leave" leave_func null ;
+  signal_connect_scroll scroll_controller "scroll" scroll_func null ;
   signal_connect_resize canvas "resize" resize_func null ;
   (* finsh me *)
   (*
-    motion, enter, leave, scroll
+    scroll
     clicks: pressed and released
-    notify and resize
+    notify
 
    *)
   ()
