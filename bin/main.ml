@@ -16,7 +16,7 @@ let libgio = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libgio-2.0.so"
 
 let libgobject = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libgobject-2.0.so"
 
-(* let libglib = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libglib-2.0.so" *)
+let libglib = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libglib-2.0.so"
 
 let libcairo = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libcairo.so.2"
 
@@ -170,6 +170,12 @@ let signal_connect_next-to-do w s cb p =
       @-> gpointer @-> gpointer @-> int @-> returning void )
     w s cb p null 0 ~from:libgobject
  *)
+let timeout_add =
+  foreign "g_timeout_add"
+    ( int
+    @-> funptr (gpointer @-> returning bool)
+    @-> gpointer @-> returning void )
+    ~from:libglib
 
 let window_present =
   foreign "gtk_window_present" (widget @-> returning void) ~from:libgtk
@@ -358,7 +364,17 @@ let window_events _app window =
   widget_add_controller window key_controller ;
   signal_connect_key_x key_controller "key-pressed" key_pressed_func null ;
   signal_connect_key_x key_controller "key-released" key_released_func null ;
+  timeout_add 1000
+    (fun _ptr -> Printf.printf "timeout \n" ; Printf.printf "%!" ; true)
+    null ;
   ()
+
+(* (glib:timeout-add *gtk-timeout-period* *)
+(*                                  (lambda (&rest args) *)
+(*                                     (declare (ignore args)) *)
+(*                                     (funcall #'de-timeout lisp-window) *)
+(*                                     glib:+source-continue+)) *)
+
 (* add
      handling of close request
      https://docs.gtk.org/gtk4/signal.Window.close-request.html
@@ -388,7 +404,6 @@ let released_func _a bn x y _b =
 let canvas_events canvas =
   let motion_controller = event_controller_motion_new () in
   let scroll_controller = event_controller_scroll_new 1 in
-  (* incomplete guess *)
   let gesture_click_controller = gesture_click_new () in
   widget_add_controller canvas motion_controller ;
   widget_add_controller canvas scroll_controller ;
@@ -397,20 +412,19 @@ let canvas_events canvas =
   signal_connect_motion_enter motion_controller "enter" enter_func null ;
   signal_connect_motion_leave motion_controller "leave" leave_func null ;
   signal_connect_scroll scroll_controller "scroll" scroll_func null ;
-  (* incomplete guess *)
   signal_connect_click_pressed gesture_click_controller "pressed" pressed_func
     null ;
   signal_connect_click_released gesture_click_controller "released"
     released_func null ;
   signal_connect_resize canvas "resize" resize_func null ;
-  (* finsh me *)
-  (*
+  ()
 
+(* finsh me *)
+(*
 
     notify
 
    *)
-  ()
 
 (* activation *)
 let activate : application -> gpointer -> unit =
