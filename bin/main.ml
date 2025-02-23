@@ -143,6 +143,24 @@ let signal_connect_scroll w s cb p =
     @-> gpointer @-> gpointer @-> int @-> returning void )
     w s cb p null 0 ~from:libgobject
 
+let signal_connect_click_pressed w s cb p =
+  foreign "g_signal_connect_data"
+    ( widget @-> string
+    @-> funptr
+          ( gpointer @-> int @-> double @-> double @-> gpointer
+          @-> returning void )
+    @-> gpointer @-> gpointer @-> int @-> returning void )
+    w s cb p null 0 ~from:libgobject
+
+let signal_connect_click_released w s cb p =
+  foreign "g_signal_connect_data"
+    ( widget @-> string
+    @-> funptr
+          ( gpointer @-> int @-> double @-> double @-> gpointer
+          @-> returning void )
+    @-> gpointer @-> gpointer @-> int @-> returning void )
+    w s cb p null 0 ~from:libgobject
+
 (*
 let signal_connect_next-to-do w s cb p =
   foreign "g_signal_connect_data"
@@ -278,9 +296,7 @@ let event_controller_scroll_new =
     ~from:libgtk
 
 let gesture_click_new =
-  foreign "gtk_event_controller_scroll_new"
-    (int @-> returning gpointer)
-    ~from:libgtk
+  foreign "gtk_gesture_click_new" (void @-> returning gpointer) ~from:libgtk
 
 let widget_add_controller =
   foreign "gtk_widget_add_controller"
@@ -359,11 +375,21 @@ let scroll_func _w dx dy _ud =
   Printf.printf "%!" ;
   ()
 
+let pressed_func _a bn x y _b =
+  Printf.printf "pressed %d %f %f\n" bn x y ;
+  Printf.printf "%!" ;
+  ()
+
+let released_func _a bn x y _b =
+  Printf.printf "released %d %f %f\n" bn x y ;
+  Printf.printf "%!" ;
+  ()
+
 let canvas_events canvas =
   let motion_controller = event_controller_motion_new () in
   let scroll_controller = event_controller_scroll_new 1 in
   (* incomplete guess *)
-  let gesture_click_controller = gesture_click_new 1 in
+  let gesture_click_controller = gesture_click_new () in
   widget_add_controller canvas motion_controller ;
   widget_add_controller canvas scroll_controller ;
   widget_add_controller canvas gesture_click_controller ;
@@ -379,9 +405,6 @@ let canvas_events canvas =
   signal_connect_resize canvas "resize" resize_func null ;
   (* finsh me *)
   (*
-
-    clicks: pressed and released
-    https://docs.gtk.org/gtk4/class.GestureClick.html
 
 
     notify
