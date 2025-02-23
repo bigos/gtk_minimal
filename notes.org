@@ -97,3 +97,6 @@ call window creation and add it to the app window tracking
 
 window creation, canvas and events
 [[file:~/Programming/Lisp/clops-gui/src/gui-window-gtk.lisp::(defun new-window-for-app]]
+
+** OCaml discuss
+https://discuss.ocaml.org/t/how-do-i-write-minesweeper-game-in-ocaml/16165/5
