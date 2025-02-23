@@ -117,10 +117,13 @@ let signal_connect_key_x w s cb p =
     @-> gpointer @-> gpointer @-> int @-> returning void )
     w s cb p null 0 ~from:libgobject
 
+(* https://docs.gtk.org/gtk4/signal.EventControllerMotion.enter.html
+doubles are not ints therefor I had zeroes
+ *)
 let signal_connect_motion_enter w s cb p =
   foreign "g_signal_connect_data"
     ( widget @-> string
-    @-> funptr (gpointer @-> int @-> int @-> gpointer @-> returning void)
+    @-> funptr (gpointer @-> double @-> double @-> gpointer @-> returning void)
     @-> gpointer @-> gpointer @-> int @-> returning void )
     w s cb p null 0 ~from:libgobject
 
@@ -302,12 +305,12 @@ let key_released_func _w kc kv s _z =
 
 (* why enter and motion gie 0 coordinates??? *)
 let motion_func _a x y _b =
-  Printf.printf "motion %d %d\n" x y ;
+  Printf.printf "motion %f %f\n" x y ;
   Printf.printf "%!" ;
   ()
 
 let enter_func _a x y _b =
-  Printf.printf "enter %d %d\n" x y ;
+  Printf.printf "enter %f %f\n" x y ;
   Printf.printf "%!" ;
   ()
 
@@ -316,15 +319,9 @@ let leave_func _a _b = Printf.printf "leave\n" ; Printf.printf "%!" ; ()
 (* file:~/Programming/Lisp/clops-gui/src/gui-window-gtk.lisp::71 *)
 let window_events _app window =
   let key_controller = event_controller_key_new () in
-  let motion_controller = event_controller_motion_new () in
   widget_add_controller window key_controller ;
-  widget_add_controller window motion_controller ;
   signal_connect_key_x key_controller "key-pressed" key_pressed_func null ;
   signal_connect_key_x key_controller "key-released" key_released_func null ;
-  (* all motions have zero coordinates *)
-  signal_connect_motion_enter motion_controller "motion" motion_func null ;
-  signal_connect_motion_enter motion_controller "enter" enter_func null ;
-  signal_connect_motion_leave motion_controller "leave" leave_func null ;
   ()
 (* add
      handling of close request
@@ -338,6 +335,11 @@ let resize_func _w width height _ud =
   ()
 
 let canvas_events canvas =
+  let motion_controller = event_controller_motion_new () in
+  widget_add_controller canvas motion_controller ;
+  signal_connect_motion_enter motion_controller "motion" motion_func null ;
+  signal_connect_motion_enter motion_controller "enter" enter_func null ;
+  signal_connect_motion_leave motion_controller "leave" leave_func null ;
   signal_connect_resize canvas "resize" resize_func null ;
   (* finsh me *)
   (*
