@@ -10,6 +10,7 @@
 open Ctypes
 open Foreign
 
+(* libraries ================================================================ *)
 let libgtk = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libgtk-4.so"
 
 let libgio = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libgio-2.0.so"
@@ -20,6 +21,7 @@ let libglib = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libglib-2.0.so"
 
 let libcairo = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libcairo.so.2"
 
+(* types ==================================================================== *)
 type window = unit ptr
 
 let window : window typ = ptr void
@@ -36,6 +38,7 @@ type gpointer = unit ptr
 
 let gpointer : gpointer typ = ptr void
 
+(* bindings ================================================================= *)
 let gtk_application_new =
   foreign "gtk_application_new"
     (string @-> int @-> returning application)
@@ -66,6 +69,8 @@ let application_run =
 
 let object_unref =
   foreign "g_object_unref" (gpointer @-> returning void) ~from:libgobject
+
+(* signal connect ----------------------------------------------------------- *)
 
 (* https://docs.gtk.org/gtk4/signal.DrawingArea.resize.html *)
 let signal_connect_resize widget s cb p =
@@ -230,6 +235,7 @@ let set_font_size =
     (gpointer @-> double @-> returning void)
     ~from:libcairo
 
+(* cairo ==================================================================== *)
 type cairo_text_extents_t
 
 let cairo_text_extents_t : cairo_text_extents_t structure typ =
@@ -266,30 +272,7 @@ let move_to =
     (gpointer @-> double @-> double @-> returning void)
     ~from:libcairo
 
-let cairo_draw_func _area cr _width _height _data =
-  set_source_rgb cr 0.9 0.0 0.0 ;
-  paint cr ;
-  set_source_rgb cr 0.0 0.0 0.0 ;
-  select_font_face cr "DejaVu Sans" 0 0 ;
-  set_font_size cr 21.2 ;
-  let text_string = "OCaml is centered" in
-  (* zzz *)
-  let tc = addr (make cairo_text_extents_t) in
-  text_extents cr text_string tc ;
-  let twidth = !@(tc |-> width) in
-  let theight = !@(tc |-> height) in
-  (* zzz *)
-  move_to cr ((600. /. 2.) -. (twidth /. 2.)) ((400.0 /. 2.) -. (theight /. 2.)) ;
-  show_text cr text_string ;
-  ()
-
-let drawing_area_set_draw_func =
-  foreign "gtk_drawing_area_set_draw_func"
-    ( widget
-    @-> funptr
-          (widget @-> gpointer @-> int @-> int @-> gpointer @-> returning void)
-    @-> gpointer @-> gpointer @-> returning void )
-    ~from:libgtk
+(* ========================================================================== *)
 
 (* events *)
 
@@ -316,6 +299,35 @@ let widget_add_controller =
     (widget @-> gpointer @-> returning void)
     ~from:libgtk
 
+(* drawing *)
+let drawing_area_set_draw_func =
+  foreign "gtk_drawing_area_set_draw_func"
+    ( widget
+    @-> funptr
+          (widget @-> gpointer @-> int @-> int @-> gpointer @-> returning void)
+    @-> gpointer @-> gpointer @-> returning void )
+    ~from:libgtk
+
+(* code ===================================================================== *)
+
+let cairo_draw_func _area cr _width _height _data =
+  set_source_rgb cr 0.9 0.0 0.0 ;
+  paint cr ;
+  set_source_rgb cr 0.0 0.0 0.0 ;
+  select_font_face cr "DejaVu Sans" 0 0 ;
+  set_font_size cr 21.2 ;
+  let text_string = "OCaml is centered" in
+  (* zzz *)
+  let tc = addr (make cairo_text_extents_t) in
+  text_extents cr text_string tc ;
+  let twidth = !@(tc |-> width) in
+  let theight = !@(tc |-> height) in
+  (* zzz *)
+  move_to cr ((600. /. 2.) -. (twidth /. 2.)) ((400.0 /. 2.) -. (theight /. 2.)) ;
+  show_text cr text_string ;
+  ()
+
+(*  *)
 (* key names *)
 (* https://gitlab.gnome.org/GNOME/gtk/-/blob/main/gdk/gdkkeysyms.h *)
 (* /usr/include/gtk-4.0/gdk/gdkkeysyms.h *)
@@ -334,11 +346,11 @@ let codes =
   Printf.printf "creating key codes hash should be done once\n" ;
   ht
 
-let find_code kc = Hashtbl.find codes kc
+let key_find_code kc = Hashtbl.find codes kc
 
 let key_pressed_func _w kc kv s _z =
   let kc_value kc = if kc <= 255 then String.make 1 (Char.chr kc) else "" in
-  let kc_name = find_code kc in
+  let kc_name = key_find_code kc in
   Printf.printf "key kc 0x%x %d kv %d s %d  %s '%s'\n" kc kc kv s kc_name
     (kc_value kc) ;
   Printf.printf "%!" ;
@@ -346,7 +358,7 @@ let key_pressed_func _w kc kv s _z =
 
 let key_released_func _w kc kv s _z =
   let kc_value kc = if kc <= 255 then String.make 1 (Char.chr kc) else "" in
-  let kc_name = find_code kc in
+  let kc_name = key_find_code kc in
   Printf.printf "released key kc 0x%x %d kv %d s %d  %s '%s'\n" kc kc kv s
     kc_name (kc_value kc) ;
   Printf.printf "%!" ;
@@ -369,19 +381,6 @@ let leave_func _a _b = Printf.printf "leave\n" ; Printf.printf "%!" ; ()
 let close_request_func _self _ud =
   Printf.printf "attempting to close window\n%!" ;
   false
-
-(* file:~/Programming/Lisp/clops-gui/src/gui-window-gtk.lisp::71 *)
-let window_events _app window =
-  let key_controller = event_controller_key_new () in
-  widget_add_controller window key_controller ;
-  signal_connect_key_x key_controller "key-pressed" key_pressed_func null ;
-  signal_connect_key_x key_controller "key-released" key_released_func null ;
-  signal_connect_close_request window "close-request" close_request_func null ;
-  (* signal_connect_activate app "activate" activate null ; *)
-  timeout_add 1000
-    (fun _ptr -> Printf.printf "timeout \n" ; Printf.printf "%!" ; true)
-    null ;
-  ()
 
 (* add
      handling of close request
@@ -407,6 +406,21 @@ let pressed_func _a bn x y _b =
 let released_func _a bn x y _b =
   Printf.printf "released %d %f %f\n" bn x y ;
   Printf.printf "%!" ;
+  ()
+
+(* events =================================================================== *)
+
+(* file:~/Programming/Lisp/clops-gui/src/gui-window-gtk.lisp::71 *)
+let window_events _app window =
+  let key_controller = event_controller_key_new () in
+  widget_add_controller window key_controller ;
+  signal_connect_key_x key_controller "key-pressed" key_pressed_func null ;
+  signal_connect_key_x key_controller "key-released" key_released_func null ;
+  signal_connect_close_request window "close-request" close_request_func null ;
+  (* signal_connect_activate app "activate" activate null ; *)
+  timeout_add 1000
+    (fun _ptr -> Printf.printf "timeout \n" ; Printf.printf "%!" ; true)
+    null ;
   ()
 
 let canvas_events canvas =

@@ -56,7 +56,7 @@ following the dune change
 #+end_example
 
 ** code
-file:~/Programming/OCaml/ocaml_experiments/gtk_minimal/bin/main.ml::9
+file:~/Programming/OCaml/gtk_minimal/bin/main.ml::1
 
 ** cairo
 http://chris00.github.io/ocaml-cairo/
