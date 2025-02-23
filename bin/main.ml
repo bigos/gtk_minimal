@@ -277,6 +277,11 @@ let event_controller_scroll_new =
     (int @-> returning gpointer)
     ~from:libgtk
 
+let gesture_click_new =
+  foreign "gtk_event_controller_scroll_new"
+    (int @-> returning gpointer)
+    ~from:libgtk
+
 let widget_add_controller =
   foreign "gtk_widget_add_controller"
     (widget @-> gpointer @-> returning void)
