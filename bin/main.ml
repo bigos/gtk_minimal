@@ -357,17 +357,28 @@ let scroll_func _w dx dy _ud =
 let canvas_events canvas =
   let motion_controller = event_controller_motion_new () in
   let scroll_controller = event_controller_scroll_new 1 in
+  (* incomplete guess *)
+  let gesture_click_controller = gesture_click_new 1 in
   widget_add_controller canvas motion_controller ;
   widget_add_controller canvas scroll_controller ;
+  widget_add_controller canvas gesture_click_controller ;
   signal_connect_motion_enter motion_controller "motion" motion_func null ;
   signal_connect_motion_enter motion_controller "enter" enter_func null ;
   signal_connect_motion_leave motion_controller "leave" leave_func null ;
   signal_connect_scroll scroll_controller "scroll" scroll_func null ;
+  (* incomplete guess *)
+  signal_connect_click_pressed gesture_click_controller "pressed" pressed_func
+    null ;
+  signal_connect_click_released gesture_click_controller "released"
+    released_func null ;
   signal_connect_resize canvas "resize" resize_func null ;
   (* finsh me *)
   (*
-    scroll
+
     clicks: pressed and released
+    https://docs.gtk.org/gtk4/class.GestureClick.html
+
+
     notify
 
    *)
