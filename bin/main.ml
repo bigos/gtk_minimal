@@ -161,6 +161,13 @@ let signal_connect_click_released w s cb p =
     @-> gpointer @-> gpointer @-> int @-> returning void )
     w s cb p null 0 ~from:libgobject
 
+let signal_connect_close_request w s cb p =
+  foreign "g_signal_connect_data"
+    ( widget @-> string
+    @-> funptr (gpointer @-> gpointer @-> returning bool)
+    @-> gpointer @-> gpointer @-> int @-> returning void )
+    w s cb p null 0 ~from:libgtk
+
 (*
 let signal_connect_next-to-do w s cb p =
   foreign "g_signal_connect_data"
@@ -358,22 +365,23 @@ let enter_func _a x y _b =
 
 let leave_func _a _b = Printf.printf "leave\n" ; Printf.printf "%!" ; ()
 
+(* returning true prevents closing the window *)
+let close_request_func _self _ud =
+  Printf.printf "attempting to close window\n%!" ;
+  false
+
 (* file:~/Programming/Lisp/clops-gui/src/gui-window-gtk.lisp::71 *)
 let window_events _app window =
   let key_controller = event_controller_key_new () in
   widget_add_controller window key_controller ;
   signal_connect_key_x key_controller "key-pressed" key_pressed_func null ;
   signal_connect_key_x key_controller "key-released" key_released_func null ;
+  signal_connect_close_request window "close-request" close_request_func null ;
+  (* signal_connect_activate app "activate" activate null ; *)
   timeout_add 1000
     (fun _ptr -> Printf.printf "timeout \n" ; Printf.printf "%!" ; true)
     null ;
   ()
-
-(* (glib:timeout-add *gtk-timeout-period* *)
-(*                                  (lambda (&rest args) *)
-(*                                     (declare (ignore args)) *)
-(*                                     (funcall #'de-timeout lisp-window) *)
-(*                                     glib:+source-continue+)) *)
 
 (* add
      handling of close request
