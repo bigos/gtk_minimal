@@ -332,7 +332,7 @@ type field = {mine_state: mine_state; field_type: field_type}
 
 let grid_size = 8
 
-let grid_indexes = [0; 1; 2; 3; 4; 5; 6; 7]
+let grid_indexes = List.init grid_size (fun a -> 1 + a - 1)
 
 let new_matrix =
   let ht = Hashtbl.create (grid_size * grid_size) in
@@ -348,7 +348,7 @@ let new_matrix =
   ht
 
 let draw_game_top_text cr =
-  set_source_rgb cr 0.9 0.0 0.0 ;
+  set_source_rgb cr 0.9 0.7 0.0 ;
   paint cr ;
   set_source_rgb cr 0.0 0.0 0.0 ;
   select_font_face cr "DejaVu Sans" 0 0 ;
