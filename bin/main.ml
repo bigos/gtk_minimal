@@ -218,6 +218,7 @@ let widget_set_vexpand =
     (widget @-> bool @-> returning void)
     ~from:libgtk
 
+(* cairo ==================================================================== *)
 let set_source_rgb =
   foreign "cairo_set_source_rgb"
     (gpointer @-> double @-> double @-> double @-> returning void)
@@ -272,6 +273,17 @@ let move_to =
     (gpointer @-> double @-> double @-> returning void)
     ~from:libcairo
 
+(* https://www.cairographics.org/manual/cairo-Paths.html#cairo-rectangle *)
+
+let rectangle =
+  foreign "cairo_rectangle"
+    (gpointer @-> double @-> double @-> double @-> double @-> returning void)
+    ~from:libcairo
+
+(* https://www.cairographics.org/manual/cairo-cairo-t.html#cairo-fill  *)
+
+let fill = foreign "cairo_fill" (gpointer @-> returning void) ~from:libcairo
+
 (* ========================================================================== *)
 
 (* events *)
@@ -310,7 +322,32 @@ let drawing_area_set_draw_func =
 
 (* code ===================================================================== *)
 
-let cairo_draw_func _area cr _width _height _data =
+(* game model =============================================================== *)
+
+type mine_state = Empty (* | Mined *)
+
+type field_type = Covered (* | Flagged | Uncovered *)
+
+type field = {mine_state: mine_state; field_type: field_type}
+
+let grid_size = 8
+
+let grid_indexes = [0; 1; 2; 3; 4; 5; 6; 7]
+
+let new_matrix =
+  let ht = Hashtbl.create (grid_size * grid_size) in
+  let _iter =
+    List.map
+      (fun ri ->
+        List.map
+          (fun ci ->
+            Hashtbl.add ht (ri, ci) {mine_state= Empty; field_type= Covered} )
+          grid_indexes )
+      grid_indexes
+  in
+  ht
+
+let draw_game_top_text cr =
   set_source_rgb cr 0.9 0.0 0.0 ;
   paint cr ;
   set_source_rgb cr 0.0 0.0 0.0 ;
@@ -321,18 +358,64 @@ let cairo_draw_func _area cr _width _height _data =
   let tc = addr (make cairo_text_extents_t) in
   text_extents cr text_string tc ;
   let twidth = !@(tc |-> width) in
-  let theight = !@(tc |-> height) in
+  let _theight = !@(tc |-> height) in
   (* zzz *)
-  move_to cr ((600. /. 2.) -. (twidth /. 2.)) ((400.0 /. 2.) -. (theight /. 2.)) ;
+  move_to cr ((600. /. 2.) -. (twidth /. 2.)) 30. ;
   show_text cr text_string ;
   ()
 
-(*  *)
+let color1 cr =
+  set_source_rgb cr 0.0 0.9 0.0 ;
+  ()
+
+let _color2 cr =
+  set_source_rgb cr 0.0 0.0 0.9 ;
+  ()
+
+let draw_game_matrix cr =
+  let ht = new_matrix in
+  let _zzz =
+    List.map
+      (fun ri ->
+        List.map
+          (fun ci ->
+            let field = Hashtbl.find ht (ri, ci) in
+            let offset_x = 100. in
+            let offset_y = 70. in
+            ( match field with
+            | {mine_state= Empty; field_type= Covered} ->
+                color1 cr
+                (* | {mine_state= Empty; field_type= Flagged} -> *)
+                (*     color2 cr *)
+                (* | {mine_state= Empty; field_type= Uncovered} -> *)
+                (*     color2 cr *)
+                (* | {mine_state= Mined; field_type= Covered} -> *)
+                (*     color2 cr *)
+                (* | {mine_state= Mined; field_type= Flagged} -> *)
+                (*     color2 cr *)
+                (* | {mine_state= Mined; field_type= Uncovered} -> *)
+                (*    color2 cr *) )
+            (* go to location for ri ci *) ;
+            rectangle cr
+              (offset_x +. (float_of_int ci *. 50.0))
+              (offset_y +. (float_of_int ri *. 50.0))
+              48.0 48.0 ;
+            (* draw rectangle *)
+            fill cr ;
+            () )
+          grid_indexes )
+      grid_indexes
+  in
+  ()
+
+let draw_game cr = draw_game_top_text cr ; draw_game_matrix cr ; ()
+
+(* gtk functions ============================================================ *)
+let cairo_draw_func _area cr _width _height _data = draw_game cr ; ()
+
 (* key names *)
 (* https://gitlab.gnome.org/GNOME/gtk/-/blob/main/gdk/gdkkeysyms.h *)
 (* /usr/include/gtk-4.0/gdk/gdkkeysyms.h *)
-
-(* because no parameter is passed this is global and executed once *)
 let codes =
   let gdkkeysyms_file = "/usr/include/gtk-4.0/gdk/gdkkeysyms.h" in
   let ht = Hashtbl.create 2300 in
@@ -364,7 +447,6 @@ let key_released_func _w kc kv s _z =
   Printf.printf "%!" ;
   ()
 
-(* why enter and motion gie 0 coordinates??? *)
 let motion_func _a x y _b =
   Printf.printf "motion %f %f\n" x y ;
   Printf.printf "%!" ;
@@ -381,11 +463,6 @@ let leave_func _a _b = Printf.printf "leave\n" ; Printf.printf "%!" ; ()
 let close_request_func _self _ud =
   Printf.printf "attempting to close window\n%!" ;
   false
-
-(* add
-     handling of close request
-     https://docs.gtk.org/gtk4/signal.Window.close-request.html
-   *)
 
 (* https://docs.gtk.org/gtk4/signal.DrawingArea.resize.html *)
 let resize_func _w width height _ud =
@@ -446,15 +523,15 @@ let canvas_events canvas =
 
     notify
 
-   *)
+ *)
 
-(* activation *)
+(* activation =============================================================== *)
 let activate : application -> gpointer -> unit =
  fun app _data ->
   let win = gtk_application_window_new app in
   application_add_window app win ;
   window_set_title win "Gtk Minimal" ;
-  window_set_default_size win 600 400 ;
+  window_set_default_size win 600 490 ;
   (* create box with orientation vertical and spacing 0 *)
   let box = box_new 1 0 in
   let canvas = drawing_area_new () in
