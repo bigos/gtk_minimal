@@ -324,9 +324,15 @@ let drawing_area_set_draw_func =
 
 (* game model =============================================================== *)
 
+let init_model = Printf.printf "doing int model\n%!"
+
 type mine_state = Empty (* | Mined *)
 
 type field_type = Covered (* | Flagged | Uncovered *)
+
+(* need t be mutable
+  https://ocaml.org/docs/mutability-imperative-control-flow
+  https://dev.realworldocaml.org/imperative-programming.html#scrollNav-2-2 *)
 
 type field = {mine_state: mine_state; field_type: field_type}
 
@@ -541,7 +547,8 @@ let activate : application -> gpointer -> unit =
   box_append box canvas ;
   window_set_child win box ;
   window_events app win ;
-  window_present win
+  window_present win ;
+  init_model
 
 let main () =
   let app = gtk_application_new "org.gtk.example" 0 in
