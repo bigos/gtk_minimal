@@ -342,12 +342,12 @@ let init_model =
   my_model := initial_model ;
   ()
 
-let imp_resize widthv heightv =
-  my_model := {!my_model with width= widthv; height= heightv} ;
+let imp_resize width height =
+  my_model := {!my_model with width; height} ;
   ()
 
-let imp_mouse_move xv yv =
-  my_model := {!my_model with x= xv; y= yv} ;
+let imp_mouse_move x y =
+  my_model := {!my_model with x; y} ;
   ()
 
 let imp_mouse_clear =
