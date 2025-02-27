@@ -324,8 +324,31 @@ let drawing_area_set_draw_func =
 (* code ===================================================================== *)
 
 (* game model =============================================================== *)
+type model = {x: float; y: float; width: int; height: int}
 
-let init_model = Printf.printf "doing init model\n%!"
+let initial_model = {x= -1.0; y= -1.0; width= 0; height= 0}
+
+let my_model = ref initial_model
+
+let global_canvas = ref 0;;
+
+let init_model =
+  my_model := initial_model ;
+  ()
+
+let imp_resize widthv heightv =
+  my_model := {!my_model with width= widthv; height= heightv} ;
+  ()
+
+let imp_mouse_move xv yv =
+  my_model := {!my_model with x= xv; y= yv} ;
+  Printf.printf "doing imp mouse move %f %f === %f %f\n%!" xv yv !my_model.x
+    !my_model.y ;
+  ()
+
+let imp_mouse_clear =
+  my_model := {!my_model with x= -1.0; y= -1.0} ;
+  ()
 
 type mine_state = Empty (* | Mined *)
 
@@ -362,7 +385,10 @@ let draw_game_top_text cr =
   set_source_rgb cr 0.0 0.0 0.0 ;
   select_font_face cr "DejaVu Sans" 0 0 ;
   set_font_size cr 21.2 ;
-  let text_string = "OCaml is centered" in
+  let text_string =
+    Printf.sprintf "OCaml model %f %f %d %d" !my_model.x !my_model.y
+      !my_model.width !my_model.height
+  in
   (* zzz *)
   let tc = addr (make cairo_text_extents_t) in
   cairo_text_extents cr text_string tc ;
@@ -459,14 +485,17 @@ let key_released_func _w kc kv s _z =
 let motion_func _a x y _b =
   Printf.printf "motion %f %f\n" x y ;
   Printf.printf "%!" ;
+  imp_mouse_move x y ;
   ()
 
 let enter_func _a x y _b =
   Printf.printf "enter %f %f\n" x y ;
   Printf.printf "%!" ;
+  imp_mouse_move x y ;
   ()
 
-let leave_func _a _b = Printf.printf "leave\n" ; Printf.printf "%!" ; ()
+let leave_func _a _b =
+  Printf.printf "leave\n" ; Printf.printf "%!" ; imp_mouse_clear ; ()
 
 (* returning true prevents closing the window *)
 let close_request_func _self _ud =
@@ -477,6 +506,7 @@ let close_request_func _self _ud =
 let resize_func _w width height _ud =
   Printf.printf "resizing %d %d\n" width height ;
   Printf.printf "%!" ;
+  imp_resize width height ;
   ()
 
 let scroll_func _w dx dy _ud =
@@ -496,7 +526,18 @@ let released_func _a bn x y _b =
 
 (* events =================================================================== *)
 
+(* (defmethod redraw-canvas ((window lisp-window) &optional log) *)
+(*                     (etypecase (gir-window window) *)
+(*                        (keyword *)
+(*                           (simulate-draw-func log)) *)
+(*                        (t *)
+(*                           (gtk4:widget-queue-draw *)
+(*                                                (serapeum:~> window gir-window gtk4:widget-first-child gtk4:widget-first-child))))) *)
+
 (* file:~/Programming/Lisp/clops-gui/src/gui-window-gtk.lisp::71 *)
+
+let redraw_canvas =
+
 let window_events _app window =
   let key_controller = event_controller_key_new () in
   widget_add_controller window key_controller ;
@@ -505,9 +546,11 @@ let window_events _app window =
   signal_connect_close_request window "close-request" close_request_func null ;
   (* signal_connect_activate app "activate" activate null ; *)
   timeout_add 1000
-    (fun _ptr -> Printf.printf "timeout \n" ; Printf.printf "%!" ; true)
+    (fun _ptr ->
+      (* redraw_canvas ; *)
+      Printf.printf "timeout \n" ; Printf.printf "%!" ; true )
     null ;
-  ()
+  ();;
 
 let canvas_events canvas =
   let motion_controller = event_controller_motion_new () in
@@ -551,6 +594,7 @@ let activate : application -> gpointer -> unit =
   window_set_child win box ;
   window_events app win ;
   window_present win ;
+  global_canvas := canvas;
   init_model
 
 let main () =
