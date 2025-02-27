@@ -258,31 +258,32 @@ let _y_advvance = field cairo_text_extents_t "y_advvance" double
 (* tell ctypes that there are no more fields to come *)
 let () = seal cairo_text_extents_t
 
-let text_extents =
+let cairo_text_extents =
   foreign "cairo_text_extents"
     (gpointer @-> string @-> ptr cairo_text_extents_t @-> returning void)
     ~from:libcairo
 
-let show_text =
+let cairo_show_text =
   foreign "cairo_show_text"
     (gpointer @-> string @-> returning void)
     ~from:libcairo
 
-let move_to =
+let cairo_move_to =
   foreign "cairo_move_to"
     (gpointer @-> double @-> double @-> returning void)
     ~from:libcairo
 
 (* https://www.cairographics.org/manual/cairo-Paths.html#cairo-rectangle *)
 
-let rectangle =
+let cairo_rectangle =
   foreign "cairo_rectangle"
     (gpointer @-> double @-> double @-> double @-> double @-> returning void)
     ~from:libcairo
 
 (* https://www.cairographics.org/manual/cairo-cairo-t.html#cairo-fill  *)
 
-let fill = foreign "cairo_fill" (gpointer @-> returning void) ~from:libcairo
+let cairo_fill =
+  foreign "cairo_fill" (gpointer @-> returning void) ~from:libcairo
 
 (* ========================================================================== *)
 
@@ -364,12 +365,12 @@ let draw_game_top_text cr =
   let text_string = "OCaml is centered" in
   (* zzz *)
   let tc = addr (make cairo_text_extents_t) in
-  text_extents cr text_string tc ;
+  cairo_text_extents cr text_string tc ;
   let twidth = !@(tc |-> width) in
   let _theight = !@(tc |-> height) in
   (* zzz *)
-  move_to cr ((600. /. 2.) -. (twidth /. 2.)) 30. ;
-  show_text cr text_string ;
+  cairo_move_to cr ((600. /. 2.) -. (twidth /. 2.)) 30. ;
+  cairo_show_text cr text_string ;
   ()
 
 let color1 cr =
@@ -404,12 +405,12 @@ let draw_game_matrix cr =
                 (* | {mine_state= Mined; field_type= Uncovered} -> *)
                 (*    color2 cr *) )
             (* go to location for ri ci *) ;
-            rectangle cr
+            cairo_rectangle cr
               (offset_x +. (float_of_int ci *. 50.0))
               (offset_y +. (float_of_int ri *. 50.0))
               48.0 48.0 ;
             (* draw rectangle *)
-            fill cr ;
+            cairo_fill cr ;
             () )
           grid_indexes )
       grid_indexes
