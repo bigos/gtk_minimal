@@ -338,8 +338,6 @@ let initial_model = {x= -1.0; y= -1.0; width= 0; height= 0}
 
 let my_model = ref initial_model
 
-(* let global_canvas = ref 0 *)
-
 let init_model =
   my_model := initial_model ;
   ()
