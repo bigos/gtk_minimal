@@ -409,7 +409,7 @@ let color1 cr =
   set_source_rgb cr 0.0 0.9 0.0 ;
   ()
 
-let _color2 cr =
+let color2 cr =
   set_source_rgb cr 0.0 0.0 0.9 ;
   ()
 
@@ -423,9 +423,18 @@ let draw_game_matrix cr =
             let field = Hashtbl.find ht (ri, ci) in
             let offset_x = 100. in
             let offset_y = 70. in
+            let wh = 48.0 in
+            let tx = offset_x +. (float_of_int ci *. 50.0) in
+            let ty = offset_y +. (float_of_int ri *. 50.0) in
+            let bx = tx +. wh in
+            let by = ty +. wh in
+            let mx = !my_model.x in
+            let my = !my_model.y in
+            let mover = tx <= mx && mx <= bx && ty <= my && my <= by in
+            let minecolor = if mover then color2 cr else color1 cr in
             ( match field with
             | {mine_state= Empty; field_type= Covered} ->
-                color1 cr
+                minecolor
                 (* | {mine_state= Empty; field_type= Flagged} -> *)
                 (*     color2 cr *)
                 (* | {mine_state= Empty; field_type= Uncovered} -> *)
@@ -437,10 +446,7 @@ let draw_game_matrix cr =
                 (* | {mine_state= Mined; field_type= Uncovered} -> *)
                 (*    color2 cr *) )
             (* go to location for ri ci *) ;
-            cairo_rectangle cr
-              (offset_x +. (float_of_int ci *. 50.0))
-              (offset_y +. (float_of_int ri *. 50.0))
-              48.0 48.0 ;
+            cairo_rectangle cr tx ty wh wh ;
             (* draw rectangle *)
             cairo_fill cr ;
             () )
@@ -543,13 +549,13 @@ let window_events _app window =
   signal_connect_key_x key_controller "key-released" key_released_func null ;
   signal_connect_close_request window "close-request" close_request_func null ;
   (* signal_connect_activate app "activate" activate null ; *)
-  timeout_add 1000
+  timeout_add 25
     (fun _ptr ->
       redraw_canvas window ;
-      Printf.printf "OCaml model %f %f %d %d" !my_model.x !my_model.y
-        !my_model.width !my_model.height ;
-      Printf.printf "timeout \n" ;
-      Printf.printf "%!" ;
+      (* Printf.printf "OCaml model %f %f %d %d" !my_model.x !my_model.y *)
+      (*   !my_model.width !my_model.height ; *)
+      (* Printf.printf "timeout \n" ; *)
+      (* Printf.printf "%!" ; *)
       true )
     null ;
   ()
