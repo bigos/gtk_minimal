@@ -59,6 +59,9 @@ let window_set_default_size =
     (window @-> int @-> int @-> returning void)
     ~from:libgtk
 
+let widget_queue_draw =
+  foreign "gtk_widget_queue_draw" (gpointer @-> returning void) ~from:libgtk
+
 (* let widget_show = *)
 (*   foreign ~from:libgtk "gtk_widget_show" (widget @-> returning void) *)
 
@@ -330,7 +333,7 @@ let initial_model = {x= -1.0; y= -1.0; width= 0; height= 0}
 
 let my_model = ref initial_model
 
-let global_canvas = ref 0;;
+(* let global_canvas = ref 0 *)
 
 let init_model =
   my_model := initial_model ;
@@ -526,17 +529,7 @@ let released_func _a bn x y _b =
 
 (* events =================================================================== *)
 
-(* (defmethod redraw-canvas ((window lisp-window) &optional log) *)
-(*                     (etypecase (gir-window window) *)
-(*                        (keyword *)
-(*                           (simulate-draw-func log)) *)
-(*                        (t *)
-(*                           (gtk4:widget-queue-draw *)
-(*                                                (serapeum:~> window gir-window gtk4:widget-first-child gtk4:widget-first-child))))) *)
-
-(* file:~/Programming/Lisp/clops-gui/src/gui-window-gtk.lisp::71 *)
-
-let redraw_canvas =
+let redraw_canvas window = widget_queue_draw window ; ()
 
 let window_events _app window =
   let key_controller = event_controller_key_new () in
@@ -547,10 +540,12 @@ let window_events _app window =
   (* signal_connect_activate app "activate" activate null ; *)
   timeout_add 1000
     (fun _ptr ->
-      (* redraw_canvas ; *)
-      Printf.printf "timeout \n" ; Printf.printf "%!" ; true )
+      redraw_canvas window ;
+      Printf.printf "timeout \n" ;
+      Printf.printf "%!" ;
+      true )
     null ;
-  ();;
+  ()
 
 let canvas_events canvas =
   let motion_controller = event_controller_motion_new () in
@@ -594,8 +589,8 @@ let activate : application -> gpointer -> unit =
   window_set_child win box ;
   window_events app win ;
   window_present win ;
-  global_canvas := canvas;
-  init_model
+  init_model ;
+  ()
 
 let main () =
   let app = gtk_application_new "org.gtk.example" 0 in
