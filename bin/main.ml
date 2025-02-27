@@ -62,6 +62,11 @@ let window_set_default_size =
 let widget_queue_draw =
   foreign "gtk_widget_queue_draw" (gpointer @-> returning void) ~from:libgtk
 
+let widget_get_first_child =
+  foreign "gtk_widget_get_first_child"
+    (gpointer @-> returning widget)
+    ~from:libgtk
+
 (* let widget_show = *)
 (*   foreign ~from:libgtk "gtk_widget_show" (widget @-> returning void) *)
 
@@ -527,7 +532,9 @@ let released_func _a bn x y _b =
 
 (* events =================================================================== *)
 
-let redraw_canvas window = widget_queue_draw window ; ()
+let redraw_canvas window =
+  widget_queue_draw (widget_get_first_child (widget_get_first_child window)) ;
+  ()
 
 let window_events _app window =
   let key_controller = event_controller_key_new () in
@@ -538,7 +545,6 @@ let window_events _app window =
   (* signal_connect_activate app "activate" activate null ; *)
   timeout_add 1000
     (fun _ptr ->
-      (* how do i trigger redrawing *)
       redraw_canvas window ;
       Printf.printf "OCaml model %f %f %d %d" !my_model.x !my_model.y
         !my_model.width !my_model.height ;
