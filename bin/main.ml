@@ -358,12 +358,6 @@ type mine_state = Empty (* | Mined *)
 
 type field_type = Covered (* | Flagged | Uncovered *)
 
-(* need t be mutable
-   https://ocaml.org/docs/mutability-imperative-control-flow#good-application-wide-state
-
-  https://ocaml.org/docs/mutability-imperative-control-flow
-  https://dev.realworldocaml.org/imperative-programming.html#scrollNav-2-2 *)
-
 type field = {mine_state: mine_state; field_type: field_type}
 
 let grid_size = 8
