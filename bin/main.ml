@@ -538,6 +538,7 @@ let window_events _app window =
   (* signal_connect_activate app "activate" activate null ; *)
   timeout_add 1000
     (fun _ptr ->
+      (* how do i trigger redrawing *)
       redraw_canvas window ;
       Printf.printf "OCaml model %f %f %d %d" !my_model.x !my_model.y
         !my_model.width !my_model.height ;
