@@ -324,7 +324,7 @@ let drawing_area_set_draw_func =
 
 (* game model =============================================================== *)
 
-let init_model = Printf.printf "doing int model\n%!"
+let init_model = Printf.printf "doing init model\n%!"
 
 type mine_state = Empty (* | Mined *)
 
