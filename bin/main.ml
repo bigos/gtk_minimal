@@ -345,8 +345,6 @@ let imp_resize widthv heightv =
 
 let imp_mouse_move xv yv =
   my_model := {!my_model with x= xv; y= yv} ;
-  Printf.printf "doing imp mouse move %f %f === %f %f\n%!" xv yv !my_model.x
-    !my_model.y ;
   ()
 
 let imp_mouse_clear =
@@ -541,6 +539,8 @@ let window_events _app window =
   timeout_add 1000
     (fun _ptr ->
       redraw_canvas window ;
+      Printf.printf "OCaml model %f %f %d %d" !my_model.x !my_model.y
+        !my_model.width !my_model.height ;
       Printf.printf "timeout \n" ;
       Printf.printf "%!" ;
       true )
