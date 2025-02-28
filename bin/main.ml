@@ -337,10 +337,9 @@ type float_coordinate = {x: float; y: float}
 
 type mouse_coordinate = None | Some of float_coordinate
 
-(* ~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-type model = {mc: mouse_coordinate; x: float; y: float; width: int; height: int}
+type model = {mc: mouse_coordinate; width: int; height: int}
 
-let initial_model = {mc= None; x= -1.0; y= -1.0; width= 0; height= 0}
+let initial_model = {mc= None; width= 0; height= 0}
 
 let my_model = ref initial_model
 
@@ -353,11 +352,11 @@ let imp_resize width height =
   ()
 
 let imp_mouse_move x y =
-  my_model := {!my_model with x; y; mc= Some {x; y}} ;
+  my_model := {!my_model with mc= Some {x; y}} ;
   ()
 
 let imp_mouse_clear =
-  my_model := {!my_model with x= -1.0; y= -1.0; mc= None} ;
+  my_model := {!my_model with mc= None} ;
   ()
 
 type mine_state = Empty (* | Mined *)
@@ -390,8 +389,7 @@ let draw_game_top_text cr =
   select_font_face cr "DejaVu Sans" 0 0 ;
   set_font_size cr 21.2 ;
   let text_string =
-    Printf.sprintf "OCaml model %f %f %d %d" !my_model.x !my_model.y
-      !my_model.width !my_model.height
+    Printf.sprintf "OCaml model  %d %d" !my_model.width !my_model.height
   in
   (* zzz *)
   let tc = addr (make cairo_text_extents_t) in
@@ -426,9 +424,15 @@ let draw_game_matrix cr =
             let ty = offset_y +. (float_of_int ri *. 50.0) in
             let bx = tx +. wh in
             let by = ty +. wh in
-            let mx = !my_model.x in
-            let my = !my_model.y in
-            let mover = tx <= mx && mx <= bx && ty <= my && my <= by in
+            let mover =
+              match !my_model.mc with
+              | None ->
+                  false
+              | Some mmc ->
+                  let mx = mmc.x in
+                  let my = mmc.y in
+                  tx <= mx && mx <= bx && ty <= my && my <= by
+            in
             let minecolor = if mover then color2 cr else color1 cr in
             ( match field with
             | {mine_state= Empty; field_type= Covered} ->
