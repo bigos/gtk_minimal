@@ -389,7 +389,12 @@ let draw_game_top_text cr =
   select_font_face cr "DejaVu Sans" 0 0 ;
   set_font_size cr 21.2 ;
   let text_string =
-    Printf.sprintf "OCaml model  %d %d" !my_model.width !my_model.height
+    match !my_model.mc with
+    | None ->
+        Printf.sprintf "OCaml model  %d %d" !my_model.width !my_model.height
+    | Some mmc ->
+        Printf.sprintf "OCaml model4 %.1f %.1f  %d %d" mmc.x mmc.y
+          !my_model.width !my_model.height
   in
   (* zzz *)
   let tc = addr (make cairo_text_extents_t) in
