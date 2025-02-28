@@ -46,6 +46,11 @@ in the Emacs evaluate the following. That can be done by going to the last line 
   #use "./bin/main.ml";;
 #+end_example
 
+*** OCaml types
+https://dev.realworldocaml.org/variants.html
+https://nikhilakki.in/understanding-the-option-type-in-ocaml
+https://teej.tv/blog/why-i-like-ocaml
+
 ** dune exec et al
 https://ocaml.org/docs/libraries-dune
 
@@ -103,6 +108,8 @@ https://discuss.ocaml.org/
 
 *** How do I write minesweeper game in OCaml?
 https://discuss.ocaml.org/t/how-do-i-write-minesweeper-game-in-ocaml/16165/5
+
+https://caml.inria.fr/pub/docs/oreilly-book/html/book-ora059.html
 
 https://ocaml.org/docs
 

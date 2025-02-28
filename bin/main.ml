@@ -332,9 +332,15 @@ let drawing_area_set_draw_func =
 (* code ===================================================================== *)
 
 (* game model =============================================================== *)
-type model = {x: float; y: float; width: int; height: int}
 
-let initial_model = {x= -1.0; y= -1.0; width= 0; height= 0}
+type float_coordinate = {x: float; y: float}
+
+type mouse_coordinate = None | Some of float_coordinate
+
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+type model = {mc: mouse_coordinate; x: float; y: float; width: int; height: int}
+
+let initial_model = {mc= None; x= -1.0; y= -1.0; width= 0; height= 0}
 
 let my_model = ref initial_model
 
@@ -347,11 +353,11 @@ let imp_resize width height =
   ()
 
 let imp_mouse_move x y =
-  my_model := {!my_model with x; y} ;
+  my_model := {!my_model with x; y; mc= Some {x; y}} ;
   ()
 
 let imp_mouse_clear =
-  my_model := {!my_model with x= -1.0; y= -1.0} ;
+  my_model := {!my_model with x= -1.0; y= -1.0; mc= None} ;
   ()
 
 type mine_state = Empty (* | Mined *)
