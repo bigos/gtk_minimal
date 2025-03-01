@@ -445,6 +445,27 @@ let color2 cr =
   set_source_rgb cr 0.0 0.0 0.9 ;
   ()
 
+let diagnosing_mover ri ci =
+  let offset_x = 100. in
+  let offset_y = 70. in
+  let wh = 48.0 in
+  let tx = offset_x +. (float_of_int ci *. 50.0) in
+  let ty = offset_y +. (float_of_int ri *. 50.0) in
+  let bx = tx +. wh in
+  let by = ty +. wh in
+  let mover =
+    match !my_model.mc with
+    | None ->
+        false
+    | Some mmc ->
+        let mx = mmc.x in
+        let my = mmc.y in
+        tx <= mx && mx <= bx && ty <= my && my <= by
+  in
+  imp_tile_coordinate_clear ;
+  if mover then imp_tile_coordinate_set ri ci else imp_tile_coordinate_clear ;
+  ()
+
 let draw_game_matrix cr =
   let ht = new_matrix in
   let _zzz =
@@ -471,8 +492,9 @@ let draw_game_matrix cr =
                   tx <= mx && mx <= bx && ty <= my && my <= by
             in
             let minecolor = if mover then color2 cr else color1 cr in
-            if mover then imp_tile_coordinate_set ri ci
-            else imp_tile_coordinate_clear ;
+            (* Printf.printf "=====> %s\n%!" *)
+            (*   (if mover then "mover" else "NOT MOVER") ; *)
+            diagnosing_mover ri ci ;
             ( match field with
             | {mine_state= Empty; field_type= Covered} ->
                 minecolor
@@ -549,7 +571,11 @@ let enter_func _a x y _b =
   ()
 
 let leave_func _a _b =
-  Printf.printf "leave\n" ; Printf.printf "%!" ; imp_mouse_clear ; ()
+  Printf.printf "leave\n" ;
+  Printf.printf "%!" ;
+  imp_tile_coordinate_clear ;
+  imp_mouse_clear ;
+  ()
 
 (* returning true prevents closing the window *)
 let close_request_func _self _ud =
