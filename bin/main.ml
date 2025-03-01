@@ -335,16 +335,29 @@ let drawing_area_set_draw_func =
 
 type float_coordinate = {x: float; y: float}
 
+type int_coordinate = {x: int; y: int}
+
 type mouse_coordinate = None | Some of float_coordinate
 
-type model = {mc: mouse_coordinate; width: int; height: int}
+type tile_coordinate = None | Some of int_coordinate
 
-let initial_model = {mc= None; width= 0; height= 0}
+type model = {mc: mouse_coordinate; width: int; height: int; tc: tile_coordinate}
+
+let initial_model = {mc= None; width= 0; height= 0; tc= None}
 
 let my_model = ref initial_model
 
 let init_model =
   my_model := initial_model ;
+  ()
+
+let respond_to_press kc_name kc_value modifiers =
+  Printf.printf "responding to press %s %s %d" kc_name kc_value modifiers ;
+  ( match !my_model.tc with
+  | None ->
+      Printf.printf "zzz"
+  | Some mmc ->
+      Printf.printf "with mmc at %d %d\n" mmc.x mmc.y ) ;
   ()
 
 let imp_resize width height =
@@ -358,6 +371,10 @@ let imp_mouse_move x y =
 let imp_mouse_clear =
   my_model := {!my_model with mc= None} ;
   ()
+
+let imp_tile_coordinate_set x y = my_model := {!my_model with tc= Some {x; y}}
+
+let imp_tile_coordinate_clear = my_model := {!my_model with tc= None}
 
 type mine_state = Empty (* | Mined *)
 
@@ -416,6 +433,7 @@ let color2 cr =
 
 let draw_game_matrix cr =
   let ht = new_matrix in
+  let _tc1 = imp_tile_coordinate_clear in
   let _zzz =
     List.map
       (fun ri ->
@@ -437,6 +455,11 @@ let draw_game_matrix cr =
                   let mx = mmc.x in
                   let my = mmc.y in
                   tx <= mx && mx <= bx && ty <= my && my <= by
+            in
+            let _tc2 =
+              if not mover then imp_tile_coordinate_clear
+              else imp_tile_coordinate_set ri ci ;
+              ()
             in
             let minecolor = if mover then color2 cr else color1 cr in
             ( match field with
@@ -485,12 +508,14 @@ let codes =
 
 let key_find_code kc = Hashtbl.find codes kc
 
+let kc_value kc = if kc <= 255 then String.make 1 (Char.chr kc) else ""
+
 let key_pressed_func _w kc kv s _z =
-  let kc_value kc = if kc <= 255 then String.make 1 (Char.chr kc) else "" in
   let kc_name = key_find_code kc in
   Printf.printf "key kc 0x%x %d kv %d s %d  %s '%s'\n" kc kc kv s kc_name
     (kc_value kc) ;
   Printf.printf "%!" ;
+  respond_to_press kc_name (kc_value kc) s ;
   ()
 
 let key_released_func _w kc kv s _z =
@@ -502,10 +527,9 @@ let key_released_func _w kc kv s _z =
   ()
 
 let motion_func _a x y _b =
-  Printf.printf "motion %f %f\n" x y ;
-  Printf.printf "%!" ;
-  imp_mouse_move x y ;
-  ()
+  (* Printf.printf "motion %f %f\n" x y ; *)
+  (* Printf.printf "%!" ; *)
+  imp_mouse_move x y ; ()
 
 let enter_func _a x y _b =
   Printf.printf "enter %f %f\n" x y ;
