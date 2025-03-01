@@ -132,7 +132,7 @@ let signal_connect_key_x w s cb p =
 
 (* https://docs.gtk.org/gtk4/signal.EventControllerMotion.enter.html
 doubles are not ints therefor I had zeroes
- *)
+*)
 let signal_connect_motion_enter w s cb p =
   foreign "g_signal_connect_data"
     ( widget @-> string
@@ -182,14 +182,14 @@ let signal_connect_close_request w s cb p =
     w s cb p null 0 ~from:libgtk
 
 (*
-let signal_connect_next-to-do w s cb p =
+   let signal_connect_next-to-do w s cb p =
   foreign "g_signal_connect_data"
     ( widget @-> string
       @-> funptr
             ( )
       @-> gpointer @-> gpointer @-> int @-> returning void )
     w s cb p null 0 ~from:libgobject
- *)
+*)
 let timeout_add =
   foreign "g_timeout_add"
     ( int
@@ -470,12 +470,9 @@ let draw_game_matrix cr =
                   let my = mmc.y in
                   tx <= mx && mx <= bx && ty <= my && my <= by
             in
-            let _tc2 =
-              if not mover then imp_tile_coordinate_clear
-              else imp_tile_coordinate_set ri ci ;
-              ()
-            in
             let minecolor = if mover then color2 cr else color1 cr in
+            if mover then imp_tile_coordinate_set ri ci
+            else imp_tile_coordinate_clear ;
             ( match field with
             | {mine_state= Empty; field_type= Covered} ->
                 minecolor
