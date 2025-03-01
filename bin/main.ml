@@ -352,12 +352,13 @@ let init_model =
   ()
 
 let respond_to_press kc_name kc_value modifiers =
-  Printf.printf "responding to press %s %s %d" kc_name kc_value modifiers ;
+  Printf.printf "=== RESPONDING TO PRESS %s %s %d ===" kc_name kc_value
+    modifiers ;
   ( match !my_model.tc with
   | None ->
       Printf.printf "zzz"
   | Some mmc ->
-      Printf.printf "with mmc at %d %d\n" mmc.x mmc.y ) ;
+      Printf.printf " with mmc at %d %d\n" mmc.x mmc.y ) ;
   ()
 
 let imp_resize width height =
@@ -369,12 +370,25 @@ let imp_mouse_move x y =
   ()
 
 let imp_mouse_clear =
+  Printf.printf "======== clearing mc ==================\n%!" ;
   my_model := {!my_model with mc= None} ;
   ()
 
-let imp_tile_coordinate_set x y = my_model := {!my_model with tc= Some {x; y}}
+let imp_tile_coordinate_set x y =
+  ( match !my_model.tc with
+  | None ->
+      ()
+  | Some mtc ->
+      if mtc.x == x && mtc.y == y then ()
+      else (
+        Printf.printf "======== setting tc ================== \n%!" ;
+        () ) ) ;
+  my_model := {!my_model with tc= Some {x; y}}
 
-let imp_tile_coordinate_clear = my_model := {!my_model with tc= None}
+let imp_tile_coordinate_clear =
+  Printf.printf "======== clearing tc ==================\n%!" ;
+  my_model := {!my_model with tc= None} ;
+  ()
 
 type mine_state = Empty (* | Mined *)
 
@@ -433,8 +447,8 @@ let color2 cr =
 
 let draw_game_matrix cr =
   let ht = new_matrix in
-  let _tc1 = imp_tile_coordinate_clear in
   let _zzz =
+    imp_tile_coordinate_clear ;
     List.map
       (fun ri ->
         List.map
