@@ -478,9 +478,9 @@ let draw_game_matrix cr =
   let ht = new_matrix in
   let _zzz =
     List.map
-      (fun ri ->
+      (fun ci ->
         List.map
-          (fun ci ->
+          (fun ri ->
             let field = Hashtbl.find ht (ri, ci) in
             let offset_x = 100. in
             let offset_y = 70. in
