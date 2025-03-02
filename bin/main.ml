@@ -406,7 +406,20 @@ let grid_coordinates =
   List.init (grid_size * grid_size) (fun a -> 0 + a)
   |> List.map (fun n -> (n / grid_size, n mod grid_size))
 
+(* https://discuss.ocaml.org/t/more-natural-preferred-way-to-shuffle-an-array/217/5 *)
+let rec shuffle = function
+  | [] ->
+      []
+  | [single] ->
+      [single]
+  | list ->
+      let before, after = List.partition (fun elt -> Random.bool ()) list in
+      List.rev_append (shuffle before) (shuffle after)
+
 (* with the coordinates working next i need to build a grid of fields some will contain mines  *)
+
+let grid_mines = grid_coordinates |> shuffle |> List.take 10
+
 let new_matrix =
   let ht = Hashtbl.create (grid_size * grid_size) in
   let _iter =
@@ -675,6 +688,7 @@ let activate : application -> gpointer -> unit =
   ()
 
 let main () =
+  Random.self_init ;
   let app = gtk_application_new "org.gtk.example" 0 in
   signal_connect_activate app "activate" activate null ;
   let status = application_run app 0 null in
