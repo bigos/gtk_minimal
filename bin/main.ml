@@ -426,8 +426,13 @@ let draw_game_top_text cr =
     | None ->
         Printf.sprintf "OCaml model  %d %d" !my_model.width !my_model.height
     | Some mmc ->
-        Printf.sprintf "OCaml model4 %.1f %.1f  %d %d" mmc.x mmc.y
+        Printf.sprintf "OCaml model4 %.1f %.1f  %d %d  at %s" mmc.x mmc.y
           !my_model.width !my_model.height
+          ( match !my_model.tc with
+          | None ->
+              "none"
+          | Some mtc ->
+              Printf.sprintf "%d-%d" mtc.x mtc.y )
   in
   (* zzz *)
   let tc = addr (make cairo_text_extents_t) in
@@ -450,7 +455,7 @@ let color2 cr =
 let diagnosing_mover mover ri ci =
   (* Printf.printf "diagnosing mover\n%!" ; *)
   (* Printf.printf "%s\n%!" (if mover then "mover" else "00000000") ; *)
-  ( if mover then imp_tile_coordinate_set ri ci
+  ( if mover then imp_tile_coordinate_set ci ri
     else
       match !my_model.tc with
       | None ->
