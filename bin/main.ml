@@ -177,6 +177,18 @@ let signal_connect_click_released w s cb p =
     @-> gpointer @-> gpointer @-> int @-> returning void )
     w s cb p null 0 ~from:libgobject
 
+(* https://docs.gtk.org/gtk4/method.GestureSingle.set_button.html *)
+
+(* void *)
+(* gtk_gesture_single_set_button ( *)
+(*   GtkGestureSingle* gesture, *)
+(*   guint button *)
+(* ) *)
+let gesture_single_set_button =
+  foreign "gtk_gesture_single_set_button"
+    (gpointer @-> int @-> returning void)
+    ~from:libgtk
+
 let signal_connect_close_request w s cb p =
   foreign "g_signal_connect_data"
     ( widget @-> string
@@ -686,6 +698,7 @@ let canvas_events canvas =
   signal_connect_motion_enter motion_controller "enter" enter_func null ;
   signal_connect_motion_leave motion_controller "leave" leave_func null ;
   signal_connect_scroll scroll_controller "scroll" scroll_func null ;
+  gesture_single_set_button gesture_click_controller 0 ;
   signal_connect_click_pressed gesture_click_controller "pressed" pressed_func
     null ;
   signal_connect_click_released gesture_click_controller "released"
