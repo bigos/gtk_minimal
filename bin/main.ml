@@ -341,24 +341,34 @@ type mouse_coordinate = None | Some of float_coordinate
 
 type tile_coordinate = None | Some of int_coordinate
 
-type model = {mc: mouse_coordinate; width: int; height: int; tc: tile_coordinate}
+type model =
+  { mc: mouse_coordinate
+  ; width: int
+  ; height: int
+  ; tc: tile_coordinate
+  ; key_pressed: bool }
 
-let initial_model = {mc= None; width= 0; height= 0; tc= None}
+let initial_model = {mc= None; width= 0; height= 0; tc= None; key_pressed= false}
 
 let my_model = ref initial_model
 
-let init_model =
+let init_model () =
   my_model := initial_model ;
   ()
 
 let respond_to_press kc_name kc_value modifiers =
   Printf.printf "=== RESPONDING TO PRESS %s %s %d ===" kc_name kc_value
     modifiers ;
+  ( match !my_model.mc with
+  | None ->
+      Printf.printf "mc none "
+  | Some mmc ->
+      Printf.printf " with mmc at %f %f " mmc.x mmc.y ) ;
   ( match !my_model.tc with
   | None ->
-      Printf.printf "zzz"
-  | Some mmc ->
-      Printf.printf " with mmc at %d %d\n" mmc.x mmc.y ) ;
+      Printf.printf "tc none\n%!"
+  | Some mtc ->
+      Printf.printf " with mmc at %d %d\n%!" mtc.x mtc.y ) ;
   ()
 
 let imp_resize width height =
@@ -369,26 +379,18 @@ let imp_mouse_move x y =
   my_model := {!my_model with mc= Some {x; y}} ;
   ()
 
-let imp_mouse_clear =
+let imp_mouse_clear () =
   Printf.printf "======== clearing mc ==================\n%!" ;
   my_model := {!my_model with mc= None} ;
   ()
 
 let imp_tile_coordinate_set x y =
-  ( match !my_model.tc with
-  | None ->
-      ()
-  | Some mtc ->
-      if mtc.x == x && mtc.y == y then ()
-      else (
-        Printf.printf "======== setting tc ================== \n%!" ;
-        () ) ) ;
+  (* Printf.printf " setting tc %d %d \n%!" x y ; *)
   my_model := {!my_model with tc= Some {x; y}}
 
-let imp_tile_coordinate_clear =
-  Printf.printf "======== clearing tc ==================\n%!" ;
-  my_model := {!my_model with tc= None} ;
-  ()
+let imp_tile_coordinate_clear () =
+  (* Printf.printf " clearinng tc \n%!" ; *)
+  my_model := {!my_model with tc= None}
 
 type mine_state = Empty (* | Mined *)
 
@@ -445,31 +447,31 @@ let color2 cr =
   set_source_rgb cr 0.0 0.0 0.9 ;
   ()
 
-let diagnosing_mover ri ci =
-  let offset_x = 100. in
-  let offset_y = 70. in
-  let wh = 48.0 in
-  let tx = offset_x +. (float_of_int ci *. 50.0) in
-  let ty = offset_y +. (float_of_int ri *. 50.0) in
-  let bx = tx +. wh in
-  let by = ty +. wh in
-  let mover =
-    match !my_model.mc with
-    | None ->
-        false
-    | Some mmc ->
-        let mx = mmc.x in
-        let my = mmc.y in
-        tx <= mx && mx <= bx && ty <= my && my <= by
-  in
-  imp_tile_coordinate_clear ;
-  if mover then imp_tile_coordinate_set ri ci else imp_tile_coordinate_clear ;
+let diagnosing_mover mover ri ci =
+  (* Printf.printf "diagnosing mover\n%!" ; *)
+  (* Printf.printf "%s\n%!" (if mover then "mover" else "00000000") ; *)
+  ( if mover then imp_tile_coordinate_set ri ci
+    else
+      match !my_model.tc with
+      | None ->
+          ()
+      | Some mtc ->
+          if mtc.x == ci && mtc.y == ri then imp_tile_coordinate_clear ()
+          else () ) ;
   ()
+
+let my_mover tx ty bx by =
+  match !my_model.mc with
+  | None ->
+      false
+  | Some mmc ->
+      let mx = mmc.x in
+      let my = mmc.y in
+      tx <= mx && mx <= bx && ty <= my && my <= by
 
 let draw_game_matrix cr =
   let ht = new_matrix in
   let _zzz =
-    imp_tile_coordinate_clear ;
     List.map
       (fun ri ->
         List.map
@@ -482,19 +484,9 @@ let draw_game_matrix cr =
             let ty = offset_y +. (float_of_int ri *. 50.0) in
             let bx = tx +. wh in
             let by = ty +. wh in
-            let mover =
-              match !my_model.mc with
-              | None ->
-                  false
-              | Some mmc ->
-                  let mx = mmc.x in
-                  let my = mmc.y in
-                  tx <= mx && mx <= bx && ty <= my && my <= by
-            in
+            let mover = my_mover tx ty bx by in
             let minecolor = if mover then color2 cr else color1 cr in
-            (* Printf.printf "=====> %s\n%!" *)
-            (*   (if mover then "mover" else "NOT MOVER") ; *)
-            diagnosing_mover ri ci ;
+            diagnosing_mover mover ri ci ;
             ( match field with
             | {mine_state= Empty; field_type= Covered} ->
                 minecolor
@@ -545,6 +537,7 @@ let kc_value kc = if kc <= 255 then String.make 1 (Char.chr kc) else ""
 
 let key_pressed_func _w kc kv s _z =
   let kc_name = key_find_code kc in
+  my_model := {!my_model with key_pressed= true} ;
   Printf.printf "key kc 0x%x %d kv %d s %d  %s '%s'\n" kc kc kv s kc_name
     (kc_value kc) ;
   Printf.printf "%!" ;
@@ -554,6 +547,8 @@ let key_pressed_func _w kc kv s _z =
 let key_released_func _w kc kv s _z =
   let kc_value kc = if kc <= 255 then String.make 1 (Char.chr kc) else "" in
   let kc_name = key_find_code kc in
+  my_model := {!my_model with key_pressed= false} ;
+  Printf.printf "key presed %s\n" (if !my_model.key_pressed then "P" else "N") ;
   Printf.printf "released key kc 0x%x %d kv %d s %d  %s '%s'\n" kc kc kv s
     kc_name (kc_value kc) ;
   Printf.printf "%!" ;
@@ -571,11 +566,7 @@ let enter_func _a x y _b =
   ()
 
 let leave_func _a _b =
-  Printf.printf "leave\n" ;
-  Printf.printf "%!" ;
-  imp_tile_coordinate_clear ;
-  imp_mouse_clear ;
-  ()
+  Printf.printf "leave\n" ; Printf.printf "%!" ; imp_mouse_clear () ; ()
 
 (* returning true prevents closing the window *)
 let close_request_func _self _ud =
@@ -670,7 +661,7 @@ let activate : application -> gpointer -> unit =
   window_set_child win box ;
   window_events app win ;
   window_present win ;
-  init_model ;
+  init_model () ;
   ()
 
 let main () =
