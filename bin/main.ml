@@ -331,8 +331,10 @@ let drawing_area_set_draw_func =
           (widget @-> gpointer @-> int @-> int @-> gpointer @-> returning void)
     @-> gpointer @-> gpointer @-> returning void )
     ~from:libgtk
+;;
 
 (* code ===================================================================== *)
+Random.self_init ()
 
 (* game model =============================================================== *)
 
@@ -395,9 +397,11 @@ let imp_tile_coordinate_clear () =
   (* Printf.printf " clearinng tc \n%!" ; *)
   my_model := {!my_model with tc= None}
 
-type mine_state = Empty (* | Mined *)
+type mine_state = Empty | Mined
 
-type field_type = Covered (* | Flagged | Uncovered *)
+type field_type = Covered
+
+(* | Flagged | Uncovered *)
 
 type field = {mine_state: mine_state; field_type: field_type}
 
@@ -421,20 +425,32 @@ let rec shuffle = function
 
 (* with the coordinates working next i need to build a grid of fields some will contain mines  *)
 
-let _grid_mines = grid_coordinates |> shuffle |> List.take 10
+let grid_mines = grid_coordinates |> shuffle |> List.take 10
 
 let new_matrix =
   let ht = Hashtbl.create (grid_size * grid_size) in
-  let _iter =
+  let _iter_mines =
+    List.map
+      (fun cc -> Hashtbl.add ht cc {mine_state= Mined; field_type= Covered})
+      grid_mines
+  in
+  let _iter_empty =
     List.map
       (fun ri ->
         List.map
           (fun ci ->
-            Hashtbl.add ht (ri, ci) {mine_state= Empty; field_type= Covered} )
+            let mine_is_found = Hashtbl.find_opt ht (ri, ci) in
+            match mine_is_found with
+            | None ->
+                Hashtbl.add ht (ri, ci) {mine_state= Empty; field_type= Covered}
+            | Some mine ->
+                Hashtbl.add ht (ri, ci) mine )
           grid_indexes )
       grid_indexes
   in
   ht
+
+let my_fields = ref new_matrix
 
 let draw_game_top_text cr =
   set_source_rgb cr 0.9 0.7 0.0 ;
@@ -453,7 +469,21 @@ let draw_game_top_text cr =
           | None ->
               "none"
           | Some mtc ->
-              Printf.sprintf "%d-%d" mtc.x mtc.y )
+              Printf.sprintf "%d-%d  - %s" mtc.x mtc.y
+                (let field = Hashtbl.find !my_fields (mtc.y, mtc.x) in
+                 match field with
+                 | {mine_state= Empty; field_type= Covered} ->
+                     "EC"
+                 (* | {mine_state= Empty; field_type= Flagged} -> *)
+                 (*     "EF" *)
+                 (* | {mine_state= Empty; field_type= Uncovered} -> *)
+                 (*     "EU" *)
+                 | {mine_state= Mined; field_type= Covered} ->
+                     "MC"
+                 (* | {mine_state= Mined; field_type= Flagged} -> *)
+                 (*     "MF" *)
+                 (* | {mine_state= Mined; field_type= Uncovered} -> *)
+                 (*    "MU" *) ) )
   in
   (* zzz *)
   let tc = addr (make cairo_text_extents_t) in
@@ -516,12 +546,12 @@ let draw_game_matrix cr =
             ( match field with
             | {mine_state= Empty; field_type= Covered} ->
                 minecolor
-                (* | {mine_state= Empty; field_type= Flagged} -> *)
-                (*     color2 cr *)
-                (* | {mine_state= Empty; field_type= Uncovered} -> *)
-                (*     color2 cr *)
-                (* | {mine_state= Mined; field_type= Covered} -> *)
-                (*     color2 cr *)
+            (* | {mine_state= Empty; field_type= Flagged} -> *)
+            (*     color2 cr *)
+            (* | {mine_state= Empty; field_type= Uncovered} -> *)
+            (*     color2 cr *)
+            | {mine_state= Mined; field_type= Covered} ->
+                set_source_rgb cr 0.9 0.0 0.5
                 (* | {mine_state= Mined; field_type= Flagged} -> *)
                 (*     color2 cr *)
                 (* | {mine_state= Mined; field_type= Uncovered} -> *)
