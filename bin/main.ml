@@ -466,7 +466,7 @@ let diagnosing_mover mover ri ci =
           else () ) ;
   ()
 
-let my_mover tx ty bx by =
+let is_mouse_over tx ty bx by =
   match !my_model.mc with
   | None ->
       false
@@ -490,7 +490,7 @@ let draw_game_matrix cr =
             let ty = offset_y +. (float_of_int ri *. 50.0) in
             let bx = tx +. wh in
             let by = ty +. wh in
-            let mover = my_mover tx ty bx by in
+            let mover = is_mouse_over tx ty bx by in
             let minecolor = if mover then color2 cr else color1 cr in
             diagnosing_mover mover ri ci ;
             ( match field with
