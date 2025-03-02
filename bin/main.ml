@@ -2,6 +2,9 @@
    Select both lines and do C-c C-r to paste them into REPL
     #cd "/home/jacek/Programming/OCaml/gtk_minimal/";;
     #use ".ocamlinit";;
+
+   Select the whole buffer pressing C-x h and then press C-c C-b to evaluate the whole buffer.
+
   You can do C-c C-b to evaluate the whole buffer or select the following line
   and doing C-c C-r
     # use "./bin/main.ml";;
@@ -413,12 +416,12 @@ let rec shuffle = function
   | [single] ->
       [single]
   | list ->
-      let before, after = List.partition (fun elt -> Random.bool ()) list in
+      let before, after = List.partition (fun _elt -> Random.bool ()) list in
       List.rev_append (shuffle before) (shuffle after)
 
 (* with the coordinates working next i need to build a grid of fields some will contain mines  *)
 
-let grid_mines = grid_coordinates |> shuffle |> List.take 10
+let _grid_mines = grid_coordinates |> shuffle |> List.take 10
 
 let new_matrix =
   let ht = Hashtbl.create (grid_size * grid_size) in
@@ -688,7 +691,7 @@ let activate : application -> gpointer -> unit =
   ()
 
 let main () =
-  Random.self_init ;
+  Random.init 64 ;
   let app = gtk_application_new "org.gtk.example" 0 in
   signal_connect_activate app "activate" activate null ;
   let status = application_run app 0 null in
