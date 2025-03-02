@@ -402,6 +402,7 @@ let grid_size = 8
 
 let grid_indexes = List.init grid_size (fun a -> 1 + a - 1)
 
+(* with the coordinates working next i need to build a grid of fields some will contain mines  *)
 let new_matrix =
   let ht = Hashtbl.create (grid_size * grid_size) in
   let _iter =
