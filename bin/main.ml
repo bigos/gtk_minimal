@@ -420,6 +420,14 @@ let imp_tile_coordinate_clear () =
   (* Printf.printf " clearinng tc \n%!" ; *)
   my_model := {!my_model with tc= None}
 
+let imp_uncover_field () =
+  Printf.printf "going to uncover field\n%!" ;
+  ()
+
+let imp_toggle_field_flag () =
+  Printf.printf "going to toggle field flag\n%!" ;
+  ()
+
 type mine_state = Empty | Mined
 
 type field_type = Covered
@@ -673,6 +681,15 @@ let pressed_func a bn x y _b =
     (current_button_name current_button)
     bn x y ;
   Printf.printf "%!" ;
+  ( match current_button with
+  | 1 ->
+      imp_uncover_field ()
+  | 2 ->
+      ()
+  | 3 ->
+      imp_toggle_field_flag ()
+  | _ ->
+      () ) ;
   ()
 
 let released_func a bn x y _b =
