@@ -422,7 +422,7 @@ let imp_tile_coordinate_clear () =
 
 type mine_state = Empty | Mined
 
-type field_type = Covered | Flagged (* | Uncovered *)
+type field_type = Covered | Flagged | Uncovered
 
 type field = {mine_state: mine_state; field_type: field_type}
 
@@ -486,7 +486,13 @@ let imp_toggle_field_flag () =
   | Some mtc ->
       let current = Hashtbl.find !my_fields (mtc.y, mtc.x) in
       let new_field_type =
-        match current.field_type with Covered -> Flagged | Flagged -> Covered
+        match current.field_type with
+        | Covered ->
+            Flagged
+        | Flagged ->
+            Covered
+        | Uncovered ->
+            Uncovered
       in
       let newf = {mine_state= current.mine_state; field_type= new_field_type} in
       Hashtbl.add !my_fields (mtc.y, mtc.x) newf ;
@@ -516,14 +522,14 @@ let draw_game_top_text cr =
                      "EC"
                  | {mine_state= Empty; field_type= Flagged} ->
                      "EF"
-                 (* | {mine_state= Empty; field_type= Uncovered} -> *)
-                 (*     "EU" *)
+                 | {mine_state= Empty; field_type= Uncovered} ->
+                     "EU"
                  | {mine_state= Mined; field_type= Covered} ->
                      "MC"
                  | {mine_state= Mined; field_type= Flagged} ->
                      "MF"
-                 (* | {mine_state= Mined; field_type= Uncovered} -> *)
-                 (*    "MU" *) ) )
+                 | {mine_state= Mined; field_type= Uncovered} ->
+                     "MU" ) )
   in
   (* zzz *)
   let tc = addr (make cairo_text_extents_t) in
@@ -587,14 +593,14 @@ let draw_game_matrix cr =
                 color1 cr
             | {mine_state= Empty; field_type= Flagged} ->
                 color2 cr
-            (* | {mine_state= Empty; field_type= Uncovered} -> *)
-            (*     color2 cr *)
+            | {mine_state= Empty; field_type= Uncovered} ->
+                color2 cr
             | {mine_state= Mined; field_type= Covered} ->
                 set_source_rgb cr 0.9 0.0 0.5
             | {mine_state= Mined; field_type= Flagged} ->
                 color2 cr
-                (* | {mine_state= Mined; field_type= Uncovered} -> *)
-                (*    color2 cr *) )
+            | {mine_state= Mined; field_type= Uncovered} ->
+                color2 cr )
             (* go to location for ri ci *) ;
             cairo_rectangle cr tx ty wh wh ;
             (* draw rectangle *)
