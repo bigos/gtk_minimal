@@ -475,7 +475,22 @@ let my_fields = ref new_matrix
 
 let imp_uncover_field () =
   Printf.printf "going to uncover field\n%!" ;
-  ()
+  let tc = !my_model.tc in
+  match tc with
+  | None ->
+      ()
+  | Some mtc ->
+      let current = Hashtbl.find !my_fields (mtc.y, mtc.x) in
+      let new_field_type =
+        match current.field_type with
+        | Covered ->
+            Uncovered
+        | _ ->
+            current.field_type
+      in
+      let newf = {mine_state= current.mine_state; field_type= new_field_type} in
+      Hashtbl.add !my_fields (mtc.y, mtc.x) newf ;
+      ()
 
 let imp_toggle_field_flag () =
   Printf.printf "going to toggle field flag\n%!" ;
@@ -790,7 +805,8 @@ let main () =
   signal_connect_activate app "activate" activate null ;
   let status = application_run app 0 null in
   object_unref app ;
-  print_endline @@ string_of_int status
+  print_endline @@ string_of_int status ;
+  ()
 ;;
 
 (* ================ *)
