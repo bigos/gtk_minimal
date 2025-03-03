@@ -330,6 +330,17 @@ let gesture_single_set_button =
     (gpointer @-> int @-> returning void)
     ~from:libgtk
 
+(* https://docs.gtk.org/gtk4/method.GestureSingle.get_current_button.html *)
+(* guint *)
+(* gtk_gesture_single_get_current_button ( *)
+(*   GtkGestureSingle* gesture *)
+(* ) *)
+
+let gesture_single_get_current_button =
+  foreign "gtk_gesture_single_get_current_button"
+    (gpointer @-> returning int)
+    ~from:libgtk
+
 let widget_add_controller =
   foreign "gtk_widget_add_controller"
     (widget @-> gpointer @-> returning void)
@@ -653,13 +664,22 @@ let scroll_func _w dx dy _ud =
   Printf.printf "%!" ;
   ()
 
-let pressed_func _a bn x y _b =
-  Printf.printf "pressed %d %f %f\n" bn x y ;
+let current_button_name current_button =
+  match current_button with 1 -> "LMB" | 2 -> "MMB" | 3 -> "RMB" | _ -> "HUH?"
+
+let pressed_func a bn x y _b =
+  let current_button = gesture_single_get_current_button a in
+  Printf.printf "pressed %s %d %f %f\n"
+    (current_button_name current_button)
+    bn x y ;
   Printf.printf "%!" ;
   ()
 
-let released_func _a bn x y _b =
-  Printf.printf "released %d %f %f\n" bn x y ;
+let released_func a bn x y _b =
+  let current_button = gesture_single_get_current_button a in
+  Printf.printf "released %s %d %f %f\n"
+    (current_button_name current_button)
+    bn x y ;
   Printf.printf "%!" ;
   ()
 
