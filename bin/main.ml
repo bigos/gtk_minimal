@@ -581,11 +581,10 @@ let draw_game_matrix cr =
             let bx = tx +. wh in
             let by = ty +. wh in
             let mover = is_mouse_over tx ty bx by in
-            let minecolor = if mover then color2 cr else color1 cr in
             diagnosing_mover mover ri ci ;
             ( match field with
             | {mine_state= Empty; field_type= Covered} ->
-                minecolor
+                color1 cr
             | {mine_state= Empty; field_type= Flagged} ->
                 color2 cr
             (* | {mine_state= Empty; field_type= Uncovered} -> *)
