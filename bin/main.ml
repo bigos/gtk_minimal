@@ -347,7 +347,7 @@ let color_to_rgba_values color =
     [redc; greenc; bluec; alphac] )
   else (
     Printf.printf "invalid color detected so using white fallback\n" ;
-    [1.0; 1.0; 1.0; 1.0] )
+    [0.50; 0.50; 0.50; 0.5] )
 
 (* aaaaaaaaaa *)
 
@@ -630,6 +630,11 @@ let color3 cr =
   set_source_rgb cr 0.0 1.0 0.7 ;
   ()
 
+let set_color cr color =
+  let rgbvals = color_to_rgba_values color in
+  set_source_rgb cr (List.nth rgbvals 0) (List.nth rgbvals 1)
+    (List.nth rgbvals 2)
+
 let diagnosing_mover mover ri ci =
   (* Printf.printf "diagnosing mover\n%!" ; *)
   (* Printf.printf "%s\n%!" (if mover then "mover" else "00000000") ; *)
@@ -671,19 +676,17 @@ let draw_game_matrix cr =
             diagnosing_mover mover ri ci ;
             ( match field with
             | {mine_state= Empty; field_type= Covered} ->
-                color1 cr
+                set_color cr "lime"
             | {mine_state= Empty; field_type= Flagged} ->
-                color2 cr
+                set_color cr "yellow"
             | {mine_state= Empty; field_type= Uncovered} ->
-                let ncl = color_to_rgba_values "pink" in
-                set_source_rgb cr (List.nth ncl 0) (List.nth ncl 1)
-                  (List.nth ncl 2)
+                set_color cr "pink"
             | {mine_state= Mined; field_type= Covered} ->
-                set_source_rgb cr 0.9 0.0 0.5
+                set_color cr "coral"
             | {mine_state= Mined; field_type= Flagged} ->
-                color2 cr
+                set_color cr "purple"
             | {mine_state= Mined; field_type= Uncovered} ->
-                color2 cr )
+                set_color cr "red" )
             (* go to location for ri ci *) ;
             cairo_rectangle cr tx ty wh wh ;
             (* draw rectangle *)
