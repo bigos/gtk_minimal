@@ -683,6 +683,7 @@ let draw_game_matrix cr =
             cairo_rectangle cr tx ty wh wh ;
             (* draw rectangle *)
             cairo_fill cr ;
+            (* next task, drawn the number of neighbouring mines *)
             () )
           grid_indexes )
       grid_indexes
