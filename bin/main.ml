@@ -674,19 +674,10 @@ let draw_game_matrix cr =
                 color1 cr
             | {mine_state= Empty; field_type= Flagged} ->
                 color2 cr
-            | {mine_state= Empty; field_type= Uncovered} -> (
-                (* let cl = *)
-                (*   color_to_rgba_values "pink" *)
-                (*   (\* [1.; 1.; 1.; 1.] *\) *)
-                (* in *)
-                (* set_source_rgb cr (List.nth cl 0) (List.nth cl 1) *)
-                (*   (List.nth cl 2) *)
-                let ncl = color_to_rgba "pink" in
-                match ncl with
-                | Some mncl ->
-                    gdk_cairo_set_source_rgba cr (addr mncl)
-                | None ->
-                    color3 cr )
+            | {mine_state= Empty; field_type= Uncovered} ->
+                let ncl = color_to_rgba_values "pink" in
+                set_source_rgb cr (List.nth ncl 0) (List.nth ncl 1)
+                  (List.nth ncl 2)
             | {mine_state= Mined; field_type= Covered} ->
                 set_source_rgb cr 0.9 0.0 0.5
             | {mine_state= Mined; field_type= Flagged} ->
