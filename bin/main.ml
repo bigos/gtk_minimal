@@ -305,13 +305,13 @@ type gdk_rgba
 
 let gdk_rgba : gdk_rgba structure typ = structure "GdkRGBA"
 
-let red = field gdk_rgba "red" double
+let red = field gdk_rgba "red" float
 
-let green = field gdk_rgba "green" double
+let green = field gdk_rgba "green" float
 
-let blue = field gdk_rgba "blue" double
+let blue = field gdk_rgba "blue" float
 
-let alpha = field gdk_rgba "alpha" double
+let alpha = field gdk_rgba "alpha" float
 
 (* no more fields to come *)
 let () = seal gdk_rgba
@@ -327,8 +327,9 @@ let color_to_rgba color =
   let valid_color = gdk_rgba_parse (addr colpointer) color in
   if valid_color then (
     (* why the color is correctly parser and translated to rgb string but is useless in setting the rgbs values for cairo? *)
-    Printf.printf "HHHHHHHHHHH %s %s\n" color
-      (gdk_rgba_to_string (addr colpointer)) ;
+    Printf.printf "HHHHHHHHHHH %s %s - %f %f %f\n" color
+      (gdk_rgba_to_string (addr colpointer))
+      (getf colpointer red) (getf colpointer green) (getf colpointer blue) ;
     Some colpointer )
   else None
 
