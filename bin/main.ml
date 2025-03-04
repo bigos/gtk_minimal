@@ -16,6 +16,8 @@ open Foreign
 (* libraries ================================================================ *)
 let libgtk = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libgtk-4.so"
 
+let libgdk = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libgdk-3.so"
+
 let libgio = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libgio-2.0.so"
 
 let libgobject = Dl.dlopen ~flags:Dl.[RTLD_NOW] ~filename:"libgobject-2.0.so"
@@ -297,7 +299,10 @@ let cairo_fill =
   foreign "cairo_fill" (gpointer @-> returning void) ~from:libcairo
 
 (* ========================================================================== *)
-
+(* ====================== gdk ============================== *)
+let gdk_keyval_name =
+  foreign "gdk_keyval_name" (int @-> returning string) ~from:libgdk
+(* ========================================================= *)
 (* events *)
 
 let event_controller_key_new =
@@ -656,6 +661,7 @@ let key_pressed_func _w kc kv s _z =
   my_model := {!my_model with key_pressed= true} ;
   Printf.printf "key kc 0x%x %d kv %d s %d  %s '%s'\n" kc kc kv s kc_name
     (kc_value kc) ;
+  Printf.printf "zzzzzzzz %s\n" (gdk_keyval_name kc) ;
   Printf.printf "%!" ;
   respond_to_press kc_name (kc_value kc) s ;
   ()
