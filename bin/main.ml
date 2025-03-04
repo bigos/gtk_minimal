@@ -345,13 +345,6 @@ let color_to_rgba_values color =
     Printf.printf "invalid color detected so using grey fallback\n" ;
     [0.50; 0.50; 0.50; 0.5] )
 
-(* aaaaaaaaaa *)
-
-let gdk_cairo_set_source_rgba =
-  foreign "gdk_cairo_set_source_rgba"
-    (gpointer @-> ptr gdk_rgba @-> returning void)
-    ~from:libgdk
-
 let gdk_keyval_name =
   foreign "gdk_keyval_name" (int @-> returning string) ~from:libgdk
 
