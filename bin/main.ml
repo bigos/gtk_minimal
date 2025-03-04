@@ -300,8 +300,55 @@ let cairo_fill =
 
 (* ========================================================================== *)
 (* ====================== gdk ============================== *)
+
+type gdk_rgba
+
+let gdk_rgba : gdk_rgba structure typ = structure "GdkRGBA"
+
+let red = field gdk_rgba "red" double
+
+let green = field gdk_rgba "green" double
+
+let blue = field gdk_rgba "blue" double
+
+let alpha = field gdk_rgba "alpha" double
+
+(* no more fields to come *)
+let () = seal gdk_rgba
+
+let gdk_rgba_parse =
+  foreign "gdk_rgba_parse" (ptr gdk_rgba @-> string @-> returning bool)
+
+let color_to_rgba color =
+  let pointer = addr (make gdk_rgba) in
+  let valid_color = gdk_rgba_parse pointer color in
+  if valid_color then Some pointer else None
+
+let color_to_rgba_values color =
+  let colpointer = addr (make gdk_rgba) in
+  let valid_color = gdk_rgba_parse colpointer color in
+  if valid_color then (
+    let redc = !@(colpointer |-> red) in
+    let greenc = !@(colpointer |-> green) in
+    let bluec = !@(colpointer |-> blue) in
+    let alphac = !@(colpointer |-> alpha) in
+    Printf.printf "correct color detected %s %f %f %f %f\n" color redc greenc
+      bluec alphac ;
+    [redc; greenc; bluec; alphac] )
+  else (
+    Printf.printf "invalid color detected so using white fallback\n" ;
+    [1.0; 1.0; 1.0; 1.0] )
+
+(* aaaaaaaaaa *)
+
+let gdk_cairo_set_source_rgba =
+  foreign "gdk_cairo_set_source_rgba"
+    (gpointer @-> ptr gdk_rgba @-> returning void)
+    ~from:libgdk
+
 let gdk_keyval_name =
   foreign "gdk_keyval_name" (int @-> returning string) ~from:libgdk
+
 (* ========================================================= *)
 (* events *)
 
@@ -569,6 +616,10 @@ let color2 cr =
   set_source_rgb cr 0.0 0.0 0.9 ;
   ()
 
+let color3 cr =
+  set_source_rgb cr 0.0 1.0 0.7 ;
+  ()
+
 let diagnosing_mover mover ri ci =
   (* Printf.printf "diagnosing mover\n%!" ; *)
   (* Printf.printf "%s\n%!" (if mover then "mover" else "00000000") ; *)
@@ -614,7 +665,12 @@ let draw_game_matrix cr =
             | {mine_state= Empty; field_type= Flagged} ->
                 color2 cr
             | {mine_state= Empty; field_type= Uncovered} ->
-                color2 cr
+                let cl =
+                  (* color_to_rgba_values "black" *)
+                  [1.; 1.; 1.; 1.]
+                in
+                set_source_rgb cr (List.nth cl 0) (List.nth cl 1)
+                  (List.nth cl 2)
             | {mine_state= Mined; field_type= Covered} ->
                 set_source_rgb cr 0.9 0.0 0.5
             | {mine_state= Mined; field_type= Flagged} ->
