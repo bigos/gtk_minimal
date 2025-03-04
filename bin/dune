@@ -3,4 +3,6 @@
  (name main)
  (link_flags
   (:standard -cclib -lgtk-4))
- (libraries  ctypes-foreign base stdio cairo2))
+ (libraries  ctypes-foreign base stdio cairo2)
+ ; https://stackoverflow.com/questions/73157592/unused-let-expression-in-ocaml
+ (flags (:standard -warn-error "-unused-value-declaration")))
