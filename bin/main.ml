@@ -330,28 +330,19 @@ let gdk_rgba_to_string =
 let color_to_rgba color =
   let colpointer = make gdk_rgba in
   let valid_color = gdk_rgba_parse (addr colpointer) color in
-  if valid_color then (
-    (* why the color is correctly parser and translated to rgb string but is useless in setting the rgbs values for cairo? *)
-    Printf.printf "HHHHHHHHHHH %s %s - %f %f %f\n" color
-      (gdk_rgba_to_string (addr colpointer))
-      (getf colpointer red) (getf colpointer green) (getf colpointer blue) ;
-    Some colpointer )
-  else None
+  if valid_color then Some colpointer else None
 
 let color_to_rgba_values color =
   let colpointer = make gdk_rgba in
   let valid_color = gdk_rgba_parse (addr colpointer) color in
-  if valid_color then (
+  if valid_color then
     let redc = getf colpointer red in
     let greenc = getf colpointer green in
     let bluec = getf colpointer blue in
     let alphac = getf colpointer alpha in
-    Printf.printf "correct color detected %s %f %f %f %f %s\n" color redc greenc
-      bluec alphac
-      (gdk_rgba_to_string (addr colpointer)) ;
-    [redc; greenc; bluec; alphac] )
+    [redc; greenc; bluec; alphac]
   else (
-    Printf.printf "invalid color detected so using white fallback\n" ;
+    Printf.printf "invalid color detected so using grey fallback\n" ;
     [0.50; 0.50; 0.50; 0.5] )
 
 (* aaaaaaaaaa *)
