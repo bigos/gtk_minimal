@@ -319,10 +319,13 @@ let () = seal gdk_rgba
 let gdk_rgba_parse =
   foreign "gdk_rgba_parse" (ptr gdk_rgba @-> string @-> returning bool)
 
+let gdk_rgba_to_string =
+  foreign "gdk_rgba_to_string" (ptr gdk_rgba @-> returning string)
+
 let color_to_rgba color =
-  let pointer = addr (make gdk_rgba) in
-  let valid_color = gdk_rgba_parse pointer color in
-  if valid_color then Some pointer else None
+  let colpointer = addr (make gdk_rgba) in
+  let valid_color = gdk_rgba_parse colpointer color in
+  if valid_color then Some colpointer else None
 
 let color_to_rgba_values color =
   let colpointer = addr (make gdk_rgba) in
@@ -332,8 +335,9 @@ let color_to_rgba_values color =
     let greenc = !@(colpointer |-> green) in
     let bluec = !@(colpointer |-> blue) in
     let alphac = !@(colpointer |-> alpha) in
-    Printf.printf "correct color detected %s %f %f %f %f\n" color redc greenc
-      bluec alphac ;
+    Printf.printf "correct color detected %s %f %f %f %f %s\n" color redc greenc
+      bluec alphac
+      (gdk_rgba_to_string colpointer) ;
     [redc; greenc; bluec; alphac] )
   else (
     Printf.printf "invalid color detected so using white fallback\n" ;
@@ -666,8 +670,8 @@ let draw_game_matrix cr =
                 color2 cr
             | {mine_state= Empty; field_type= Uncovered} ->
                 let cl =
-                  (* color_to_rgba_values "black" *)
-                  [1.; 1.; 1.; 1.]
+                  color_to_rgba_values "pink"
+                  (* [1.; 1.; 1.; 1.] *)
                 in
                 set_source_rgb cr (List.nth cl 0) (List.nth cl 1)
                   (List.nth cl 2)
