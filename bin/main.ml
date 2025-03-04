@@ -622,8 +622,7 @@ let set_color cr color =
   else
     match color_to_rgba color with
     | None ->
-        set_source_rgb cr 0.5 0.5 0.5 ;
-        ()
+        set_source_rgb cr 0.5 0.5 0.5
     | Some qrgb ->
         set_source_rgba cr (getf qrgb red) (getf qrgb green) (getf qrgb blue)
           1.0
