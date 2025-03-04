@@ -323,21 +323,26 @@ let gdk_rgba_to_string =
   foreign "gdk_rgba_to_string" (ptr gdk_rgba @-> returning string)
 
 let color_to_rgba color =
-  let colpointer = addr (make gdk_rgba) in
-  let valid_color = gdk_rgba_parse colpointer color in
-  if valid_color then Some colpointer else None
+  let colpointer = make gdk_rgba in
+  let valid_color = gdk_rgba_parse (addr colpointer) color in
+  if valid_color then (
+    (* why the color is correctly parser and translated to rgb string but is useless in setting the rgbs values for cairo? *)
+    Printf.printf "HHHHHHHHHHH %s %s\n" color
+      (gdk_rgba_to_string (addr colpointer)) ;
+    Some colpointer )
+  else None
 
 let color_to_rgba_values color =
-  let colpointer = addr (make gdk_rgba) in
-  let valid_color = gdk_rgba_parse colpointer color in
+  let colpointer = make gdk_rgba in
+  let valid_color = gdk_rgba_parse (addr colpointer) color in
   if valid_color then (
-    let redc = !@(colpointer |-> red) in
-    let greenc = !@(colpointer |-> green) in
-    let bluec = !@(colpointer |-> blue) in
-    let alphac = !@(colpointer |-> alpha) in
+    let redc = getf colpointer red in
+    let greenc = getf colpointer green in
+    let bluec = getf colpointer blue in
+    let alphac = getf colpointer alpha in
     Printf.printf "correct color detected %s %f %f %f %f %s\n" color redc greenc
       bluec alphac
-      (gdk_rgba_to_string colpointer) ;
+      (gdk_rgba_to_string (addr colpointer)) ;
     [redc; greenc; bluec; alphac] )
   else (
     Printf.printf "invalid color detected so using white fallback\n" ;
@@ -668,13 +673,19 @@ let draw_game_matrix cr =
                 color1 cr
             | {mine_state= Empty; field_type= Flagged} ->
                 color2 cr
-            | {mine_state= Empty; field_type= Uncovered} ->
-                let cl =
-                  color_to_rgba_values "pink"
-                  (* [1.; 1.; 1.; 1.] *)
-                in
-                set_source_rgb cr (List.nth cl 0) (List.nth cl 1)
-                  (List.nth cl 2)
+            | {mine_state= Empty; field_type= Uncovered} -> (
+                (* let cl = *)
+                (*   color_to_rgba_values "pink" *)
+                (*   (\* [1.; 1.; 1.; 1.] *\) *)
+                (* in *)
+                (* set_source_rgb cr (List.nth cl 0) (List.nth cl 1) *)
+                (*   (List.nth cl 2) *)
+                let ncl = color_to_rgba "pink" in
+                match ncl with
+                | Some mncl ->
+                    gdk_cairo_set_source_rgba cr (addr mncl)
+                | None ->
+                    color3 cr )
             | {mine_state= Mined; field_type= Covered} ->
                 set_source_rgb cr 0.9 0.0 0.5
             | {mine_state= Mined; field_type= Flagged} ->
