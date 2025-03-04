@@ -237,6 +237,11 @@ let set_source_rgb =
     (gpointer @-> double @-> double @-> double @-> returning void)
     ~from:libcairo
 
+let set_source_rgba =
+  foreign "cairo_set_source_rgba"
+    (gpointer @-> double @-> double @-> double @-> double @-> returning void)
+    ~from:libcairo
+
 let paint = foreign "cairo_paint" (gpointer @-> returning void) ~from:libcairo
 
 let select_font_face =
@@ -618,22 +623,19 @@ let draw_game_top_text cr =
   cairo_show_text cr text_string ;
   ()
 
-let color1 cr =
-  set_source_rgb cr 0.0 0.9 0.0 ;
-  ()
-
-let color2 cr =
-  set_source_rgb cr 0.0 0.0 0.9 ;
-  ()
-
-let color3 cr =
-  set_source_rgb cr 0.0 1.0 0.7 ;
-  ()
-
 let set_color cr color =
-  let rgbvals = color_to_rgba_values color in
-  set_source_rgb cr (List.nth rgbvals 0) (List.nth rgbvals 1)
-    (List.nth rgbvals 2)
+  if false then
+    let rgbvals = color_to_rgba_values color in
+    set_source_rgb cr (List.nth rgbvals 0) (List.nth rgbvals 1)
+      (List.nth rgbvals 2)
+  else
+    match color_to_rgba color with
+    | None ->
+        set_source_rgb cr 0.5 0.5 0.5 ;
+        ()
+    | Some qrgb ->
+        set_source_rgba cr (getf qrgb red) (getf qrgb green) (getf qrgb blue)
+          1.0
 
 let diagnosing_mover mover ri ci =
   (* Printf.printf "diagnosing mover\n%!" ; *)
