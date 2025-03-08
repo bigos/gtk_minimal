@@ -685,6 +685,12 @@ let draw_game_matrix cr =
             (* draw rectangle *)
             cairo_fill cr ;
             (* next task, drawn the number of neighbouring mines *)
+            set_color cr "blue" ;
+            select_font_face cr "DejaVu Sans" 0 0 ;
+            set_font_size cr 15.0 ;
+            let text_string = "8" in
+            cairo_move_to cr (tx +. 5.0) (ty +. 15.0) ;
+            cairo_show_text cr text_string ;
             () )
           grid_indexes )
       grid_indexes
