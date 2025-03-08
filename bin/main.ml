@@ -652,6 +652,17 @@ let is_mouse_over tx ty bx by =
 
 let tile_text ci ri = Printf.sprintf "%d-%d" ci ri
 
+let neighbours3 = List.init 3 (fun a -> -1 + a)
+
+let with3neighbours ci ri w h =
+  List.map
+    (fun cix -> List.map (fun rix -> (ci + cix, ri + rix)) neighbours3)
+    neighbours3
+  |> List.flatten
+  |> List.filter (fun (a, b) -> not (a == ci && b == ri))
+  |> List.filter (fun (a, b) -> a >= 0 && b >= 0)
+  |> List.filter (fun (a, b) -> a < w && b < h)
+
 let draw_game_matrix cr =
   let ht = new_matrix in
   let _zzz =
