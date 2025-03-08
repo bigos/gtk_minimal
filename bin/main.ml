@@ -650,6 +650,8 @@ let is_mouse_over tx ty bx by =
       let my = mmc.y in
       tx <= mx && mx <= bx && ty <= my && my <= by
 
+let tile_text ci ri = Printf.sprintf "%d-%d" ci ri
+
 let draw_game_matrix cr =
   let ht = new_matrix in
   let _zzz =
@@ -688,7 +690,7 @@ let draw_game_matrix cr =
             set_color cr "blue" ;
             select_font_face cr "DejaVu Sans" 0 0 ;
             set_font_size cr 15.0 ;
-            let text_string = "8" in
+            let text_string = tile_text ci ri in
             cairo_move_to cr (tx +. 5.0) (ty +. 15.0) ;
             cairo_show_text cr text_string ;
             () )
