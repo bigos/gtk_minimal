@@ -322,10 +322,12 @@ let alpha = field gdk_rgba "alpha" float
 let () = seal gdk_rgba
 
 let gdk_rgba_parse =
-  foreign "gdk_rgba_parse" (ptr gdk_rgba @-> string @-> returning bool)
+  foreign "gdk_rgba_parse"
+    (ptr gdk_rgba @-> string @-> returning bool)
+    ~from:libgdk
 
 let _gdk_rgba_to_string =
-  foreign "gdk_rgba_to_string" (ptr gdk_rgba @-> returning string)
+  foreign "gdk_rgba_to_string" (ptr gdk_rgba @-> returning string) ~from:libgdk
 
 let color_to_rgba color =
   let colpointer = make gdk_rgba in
@@ -650,11 +652,9 @@ let is_mouse_over tx ty bx by =
       let my = mmc.y in
       tx <= mx && mx <= bx && ty <= my && my <= by
 
-let tile_text ci ri = Printf.sprintf "%d-%d" ci ri
-
 let neighbours3 = List.init 3 (fun a -> -1 + a)
 
-let with3neighbours ci ri w h =
+let withneighbours ci ri w h =
   List.map
     (fun cix -> List.map (fun rix -> (ci + cix, ri + rix)) neighbours3)
     neighbours3
@@ -662,6 +662,14 @@ let with3neighbours ci ri w h =
   |> List.filter (fun (a, b) -> not (a == ci && b == ri))
   |> List.filter (fun (a, b) -> a >= 0 && b >= 0)
   |> List.filter (fun (a, b) -> a < w && b < h)
+
+let tile_text ci ri =
+  Printf.sprintf "%d-%d %d" ci ri
+    ( withneighbours ci ri grid_size grid_size
+    |> List.filter (fun (a, b) ->
+           let f = Hashtbl.find !my_fields (a, b) in
+           f.mine_state == Mined )
+    |> List.length )
 
 let draw_game_matrix cr =
   let ht = new_matrix in
