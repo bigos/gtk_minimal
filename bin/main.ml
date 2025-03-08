@@ -662,7 +662,7 @@ let withneighbours ci ri w h =
   |> List.filter (fun (a, b) -> a < w && b < h)
 
 let tile_text ci ri =
-  Printf.sprintf "%d-%d %d" ci ri
+  Printf.sprintf "%d"
     ( withneighbours ci ri grid_size grid_size
     |> List.map (fun (a, b) -> Hashtbl.find !my_fields (b, a))
     |> List.filter (fun f -> f.mine_state == Mined)
