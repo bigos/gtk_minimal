@@ -326,15 +326,15 @@ let gdk_rgba_parse =
     (ptr gdk_rgba @-> string @-> returning bool)
     ~from:libgdk
 
-(* let _gdk_rgba_to_string = *)
-(*   foreign "gdk_rgba_to_string" (ptr gdk_rgba @-> returning string) ~from:libgdk *)
+let gdk_rgba_to_string =
+  foreign "gdk_rgba_to_string" (ptr gdk_rgba @-> returning string) ~from:libgdk
 
 let color_to_rgba color =
   let colpointer = make gdk_rgba in
   let valid_color = gdk_rgba_parse (addr colpointer) color in
   if valid_color then Some colpointer else None
 
-let _color_to_rgba_values color =
+let color_to_rgba_values color =
   let colpointer = make gdk_rgba in
   let valid_color = gdk_rgba_parse (addr colpointer) color in
   if valid_color then
