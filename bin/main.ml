@@ -332,7 +332,7 @@ let color_to_rgba color =
   let valid_color = gdk_rgba_parse (addr colpointer) color in
   if valid_color then Some colpointer else None
 
-let color_to_rgba_values color =
+let _color_to_rgba_values color =
   let colpointer = make gdk_rgba in
   let valid_color = gdk_rgba_parse (addr colpointer) color in
   if valid_color then
@@ -410,6 +410,13 @@ let drawing_area_set_draw_func =
 (* code ===================================================================== *)
 Random.self_init ()
 
+let set_color cr color =
+  match color_to_rgba color with
+  | None ->
+      set_source_rgb cr 0.5 0.5 0.5
+  | Some qrgb ->
+      set_source_rgba cr (getf qrgb red) (getf qrgb green) (getf qrgb blue) 1.0
+
 (* game model =============================================================== *)
 
 type float_coordinate = {x: float; y: float}
@@ -426,6 +433,12 @@ type model =
   ; height: int
   ; tc: tile_coordinate
   ; key_pressed: bool }
+
+type mine_state = Empty | Mined
+
+type field_type = Covered | Flagged | Uncovered
+
+type field = {mine_state: mine_state; field_type: field_type}
 
 let initial_model = {mc= None; width= 0; height= 0; tc= None; key_pressed= false}
 
@@ -470,12 +483,6 @@ let imp_tile_coordinate_set x y =
 let imp_tile_coordinate_clear () =
   (* Printf.printf " clearinng tc \n%!" ; *)
   my_model := {!my_model with tc= None}
-
-type mine_state = Empty | Mined
-
-type field_type = Covered | Flagged | Uncovered
-
-type field = {mine_state: mine_state; field_type: field_type}
 
 let grid_size = 8
 
@@ -564,7 +571,7 @@ let imp_toggle_field_flag () =
       Hashtbl.add !my_fields (mtc.y, mtc.x) newf ;
       ()
 
-let draw_game_top_text cr =
+let draw_game_top_text_line1 cr =
   set_source_rgb cr 0.9 0.7 0.0 ;
   paint cr ;
   set_source_rgb cr 0.0 0.0 0.0 ;
@@ -607,18 +614,19 @@ let draw_game_top_text cr =
   cairo_show_text cr text_string ;
   ()
 
-let set_color cr color =
-  if false then
-    let rgbvals = color_to_rgba_values color in
-    set_source_rgb cr (List.nth rgbvals 0) (List.nth rgbvals 1)
-      (List.nth rgbvals 2)
-  else
-    match color_to_rgba color with
-    | None ->
-        set_source_rgb cr 0.5 0.5 0.5
-    | Some qrgb ->
-        set_source_rgba cr (getf qrgb red) (getf qrgb green) (getf qrgb blue)
-          1.0
+let draw_game_top_text_line2 cr =
+  set_color cr "blue" ;
+  select_font_face cr "DejaVu Sans" 0 0 ;
+  set_font_size cr 15.0 ;
+  let text_string = "tra la la" in
+  cairo_move_to cr 10.0 50.0 ;
+  cairo_show_text cr text_string ;
+  ()
+
+let draw_game_top_text cr =
+  draw_game_top_text_line1 cr ;
+  draw_game_top_text_line2 cr ;
+  ()
 
 let diagnosing_mover mover ri ci =
   (* Printf.printf "diagnosing mover\n%!" ; *)
