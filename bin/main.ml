@@ -322,19 +322,17 @@ let alpha = field gdk_rgba "alpha" float
 let () = seal gdk_rgba
 
 let gdk_rgba_parse =
-  foreign "gdk_rgba_parse"
-    (ptr gdk_rgba @-> string @-> returning bool)
-    ~from:libgdk
+  foreign "gdk_rgba_parse" (ptr gdk_rgba @-> string @-> returning bool)
 
-let gdk_rgba_to_string =
-  foreign "gdk_rgba_to_string" (ptr gdk_rgba @-> returning string) ~from:libgdk
+let _gdk_rgba_to_string =
+  foreign "gdk_rgba_to_string" (ptr gdk_rgba @-> returning string)
 
 let color_to_rgba color =
   let colpointer = make gdk_rgba in
   let valid_color = gdk_rgba_parse (addr colpointer) color in
   if valid_color then Some colpointer else None
 
-let color_to_rgba_values color =
+let _color_to_rgba_values color =
   let colpointer = make gdk_rgba in
   let valid_color = gdk_rgba_parse (addr colpointer) color in
   if valid_color then
@@ -666,9 +664,8 @@ let withneighbours ci ri w h =
 let tile_text ci ri =
   Printf.sprintf "%d-%d %d" ci ri
     ( withneighbours ci ri grid_size grid_size
-    |> List.filter (fun (a, b) ->
-           let f = Hashtbl.find !my_fields (a, b) in
-           f.mine_state == Mined )
+    |> List.map (fun (a, b) -> Hashtbl.find !my_fields (b, a))
+    |> List.filter (fun f -> f.mine_state == Mined)
     |> List.length )
 
 let draw_game_matrix cr =
