@@ -324,7 +324,7 @@ let () = seal gdk_rgba
 let gdk_rgba_parse =
   foreign "gdk_rgba_parse" (ptr gdk_rgba @-> string @-> returning bool)
 
-let gdk_rgba_to_string =
+let _gdk_rgba_to_string =
   foreign "gdk_rgba_to_string" (ptr gdk_rgba @-> returning string)
 
 let color_to_rgba color =
@@ -691,40 +691,24 @@ let cairo_draw_func _area cr _width _height _data = draw_game cr ; ()
 (* key names *)
 (* https://gitlab.gnome.org/GNOME/gtk/-/blob/main/gdk/gdkkeysyms.h *)
 (* /usr/include/gtk-4.0/gdk/gdkkeysyms.h *)
-let codes =
-  let gdkkeysyms_file = "/usr/include/gtk-4.0/gdk/gdkkeysyms.h" in
-  let ht = Hashtbl.create 2300 in
-  let _gathered_codes =
-    In_channel.with_open_text gdkkeysyms_file In_channel.input_lines
-    |> List.filter (fun s -> String.starts_with ~prefix:"#def" s)
-    |> List.map (fun s -> String.split_on_char (Char.chr 32) s)
-    |> List.map (fun a ->
-           Hashtbl.add ht (int_of_string (List.nth a 2)) (List.nth a 1) )
-  in
-  Printf.printf "creating key codes hash should be done once\n" ;
-  ht
-
-let key_find_code kc = Hashtbl.find codes kc
 
 let kc_value kc = if kc <= 255 then String.make 1 (Char.chr kc) else ""
 
 let key_pressed_func _w kc kv s _z =
-  let kc_name = key_find_code kc in
   my_model := {!my_model with key_pressed= true} ;
-  Printf.printf "key kc 0x%x %d kv %d s %d  %s '%s'\n" kc kc kv s kc_name
-    (kc_value kc) ;
+  Printf.printf "key kc 0x%x %d kv %d s %d  %s '%s'\n" kc kc kv s
+    (gdk_keyval_name kc) (kc_value kc) ;
   Printf.printf "zzzzzzzz %s\n" (gdk_keyval_name kc) ;
   Printf.printf "%!" ;
-  respond_to_press kc_name (kc_value kc) s ;
+  respond_to_press (gdk_keyval_name kc) (kc_value kc) s ;
   ()
 
 let key_released_func _w kc kv s _z =
   let kc_value kc = if kc <= 255 then String.make 1 (Char.chr kc) else "" in
-  let kc_name = key_find_code kc in
   my_model := {!my_model with key_pressed= false} ;
   Printf.printf "key presed %s\n" (if !my_model.key_pressed then "P" else "N") ;
   Printf.printf "released key kc 0x%x %d kv %d s %d  %s '%s'\n" kc kc kv s
-    kc_name (kc_value kc) ;
+    (gdk_keyval_name kc) (kc_value kc) ;
   Printf.printf "%!" ;
   ()
 
