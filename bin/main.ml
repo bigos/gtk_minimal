@@ -570,7 +570,7 @@ let imp_uncover_field () =
             current.field_type
       in
       let newf = {mine_state= current.mine_state; field_type= new_field_type} in
-      Hashtbl.add !my_fields (mtc.y, mtc.x) newf ;
+      Hashtbl.replace !my_fields (mtc.y, mtc.x) newf ;
       ()
 
 let imp_toggle_field_flag () =
@@ -591,7 +591,7 @@ let imp_toggle_field_flag () =
             Uncovered
       in
       let newf = {mine_state= current.mine_state; field_type= new_field_type} in
-      Hashtbl.add !my_fields (mtc.y, mtc.x) newf ;
+      Hashtbl.replace !my_fields (mtc.y, mtc.x) newf ;
       ()
 
 let check_game_state the_fields =
