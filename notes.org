@@ -120,3 +120,22 @@ https://ocaml.org/manual/5.3/api/Hashtbl.html
 
 https://github.com/rossberg/boulder-dash
 https://github.com/aryx/ocaml-elm-playground
+
+** debugging mine sweeper
+
+*** top lines
+[[file:bin/main.ml::let draw_game_top_text cr =]]
+
+*** draw game matrix
+[[file:bin/main.ml::let draw_game_matrix cr =]]
+
+*** mouse presses
+[[file:bin/main.ml::let pressed_func a bn x y _b =]]
+
+**** impl
+[[file:bin/main.ml::let imp_uncover_field]]
+
+[[file:bin/main.ml::let imp_toggle_field_flag]]
+
+**** check game state
+[[file:bin/main.ml::let check_game_state]]
