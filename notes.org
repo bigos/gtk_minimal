@@ -137,5 +137,10 @@ https://github.com/aryx/ocaml-elm-playground
 
 [[file:bin/main.ml::let imp_toggle_field_flag]]
 
-**** check game state
+*** check game state
 [[file:bin/main.ml::let check_game_state]]
+
+*** types
+[[file:bin/main.ml::type game_state]]
+
+[[file:bin/main.ml::type field = {mine_state: mine_state; field_type: field_type}]]
