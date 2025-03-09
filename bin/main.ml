@@ -594,7 +594,8 @@ let imp_toggle_field_flag () =
       Hashtbl.replace !my_fields (mtc.y, mtc.x) newf ;
       ()
 
-let check_game_state the_fields =
+let check_game_state () =
+  let the_fields = !my_fields in
   let all_fields = Hashtbl.to_seq_values the_fields in
   let uncovered_mines =
     Seq.filter
@@ -762,7 +763,7 @@ let draw_game_matrix cr =
             | {mine_state= Empty; field_type= Uncovered} ->
                 set_color cr "pink"
             | {mine_state= Mined; field_type= Covered} ->
-                set_color cr "coral"
+                set_color cr (if true then "lime" else "coral")
             | {mine_state= Mined; field_type= Flagged} ->
                 set_color cr "purple"
             | {mine_state= Mined; field_type= Uncovered} ->
@@ -866,8 +867,7 @@ let pressed_func a bn x y _b =
       imp_toggle_field_flag ()
   | _ ->
       () ) ;
-  check_game_state !my_fields ;
-  ()
+  check_game_state () ; ()
 
 let released_func a bn x y _b =
   let current_button = gesture_single_get_current_button a in
