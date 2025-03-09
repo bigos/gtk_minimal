@@ -427,12 +427,15 @@ type mouse_coordinate = None | Some of float_coordinate
 
 type tile_coordinate = None | Some of int_coordinate
 
+type game_state = Playing | Won | Lost
+
 type model =
   { mc: mouse_coordinate
   ; width: int
   ; height: int
   ; tc: tile_coordinate
-  ; key_pressed: bool }
+  ; key_pressed: bool
+  ; game_state: game_state }
 
 type mine_state = Empty | Mined
 
@@ -440,13 +443,33 @@ type field_type = Covered | Flagged | Uncovered
 
 type field = {mine_state: mine_state; field_type: field_type}
 
-let initial_model = {mc= None; width= 0; height= 0; tc= None; key_pressed= false}
+let initial_model =
+  { mc= None
+  ; width= 0
+  ; height= 0
+  ; tc= None
+  ; key_pressed= false
+  ; game_state= Playing }
 
 let my_model = ref initial_model
 
 let init_model () =
   my_model := initial_model ;
   ()
+
+let inspect_my_model () =
+  let m = !my_model in
+  let mtc = m.tc in
+  Printf.sprintf "tra la la - tc (%d,%d) - game_state %s"
+    (match mtc with None -> -1 | Some cc -> cc.x)
+    (match mtc with None -> -1 | Some cc -> cc.y)
+    ( match m.game_state with
+    | Playing ->
+        "Playing"
+    | Won ->
+        "Won"
+    | Lost ->
+        "Lost" )
 
 let respond_to_press kc_name kc_value modifiers =
   Printf.printf "=== RESPONDING TO PRESS %s %s %d ===" kc_name kc_value
@@ -534,21 +557,30 @@ let my_fields = ref new_matrix
 let imp_uncover_field () =
   Printf.printf "going to uncover field\n%!" ;
   let tc = !my_model.tc in
-  match tc with
-  | None ->
+  let game_state = !my_model.game_state in
+  match game_state with
+  | Won ->
       ()
-  | Some mtc ->
-      let current = Hashtbl.find !my_fields (mtc.y, mtc.x) in
-      let new_field_type =
-        match current.field_type with
-        | Covered ->
-            Uncovered
-        | _ ->
-            current.field_type
-      in
-      let newf = {mine_state= current.mine_state; field_type= new_field_type} in
-      Hashtbl.add !my_fields (mtc.y, mtc.x) newf ;
+  | Lost ->
       ()
+  | Playing -> (
+    match tc with
+    | None ->
+        ()
+    | Some mtc ->
+        let current = Hashtbl.find !my_fields (mtc.y, mtc.x) in
+        let new_field_type =
+          match current.field_type with
+          | Covered ->
+              Uncovered
+          | _ ->
+              current.field_type
+        in
+        let newf =
+          {mine_state= current.mine_state; field_type= new_field_type}
+        in
+        Hashtbl.add !my_fields (mtc.y, mtc.x) newf ;
+        () )
 
 let imp_toggle_field_flag () =
   Printf.printf "going to toggle field flag\n%!" ;
@@ -570,6 +602,22 @@ let imp_toggle_field_flag () =
       let newf = {mine_state= current.mine_state; field_type= new_field_type} in
       Hashtbl.add !my_fields (mtc.y, mtc.x) newf ;
       ()
+
+let check_game_state () =
+  let uncovered_mines =
+    Seq.filter
+      (fun f -> f.mine_state == Mined && f.field_type == Uncovered)
+      (Hashtbl.to_seq_values !my_fields)
+  in
+  if Seq.length uncovered_mines > 0 then
+    my_model := {!my_model with game_state= Lost}
+  else () ;
+  ()
+
+(* my_model := *)
+(*   { !my_model with *)
+(*     game_state= (if current.mine_state = Empty then Playing else Lost) *)
+(*   } *)
 
 let draw_game_top_text_line1 cr =
   set_source_rgb cr 0.9 0.7 0.0 ;
@@ -618,7 +666,7 @@ let draw_game_top_text_line2 cr =
   set_color cr "blue" ;
   select_font_face cr "DejaVu Sans" 0 0 ;
   set_font_size cr 15.0 ;
-  let text_string = "tra la la" in
+  let text_string = inspect_my_model () in
   cairo_move_to cr 10.0 50.0 ;
   cairo_show_text cr text_string ;
   ()
@@ -793,7 +841,7 @@ let pressed_func a bn x y _b =
       imp_toggle_field_flag ()
   | _ ->
       () ) ;
-  ()
+  check_game_state () ; ()
 
 let released_func a bn x y _b =
   let current_button = gesture_single_get_current_button a in
