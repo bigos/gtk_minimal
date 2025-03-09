@@ -603,15 +603,36 @@ let imp_toggle_field_flag () =
       Hashtbl.add !my_fields (mtc.y, mtc.x) newf ;
       ()
 
-let check_game_state () =
+let check_game_state the_fields =
+  let all_fields = Hashtbl.to_seq_values the_fields in
   let uncovered_mines =
     Seq.filter
       (fun f -> f.mine_state == Mined && f.field_type == Uncovered)
-      (Hashtbl.to_seq_values !my_fields)
+      all_fields
   in
-  if Seq.length uncovered_mines > 0 then
-    my_model := {!my_model with game_state= Lost}
-  else () ;
+  let still_covered_empty =
+    Seq.filter
+      (fun f -> f.mine_state == Empty && f.field_type == Covered)
+      all_fields
+  in
+  let unflagged_mines =
+    Seq.filter
+      (fun f -> f.mine_state == Mined && f.field_type == Covered)
+      all_fields
+  in
+  Printf.printf "%d %d %d\n"
+    (Seq.length uncovered_mines)
+    (* why these numbers do not go down as i click through the game? *)
+    (Seq.length still_covered_empty)
+    (Seq.length unflagged_mines) ;
+  my_model :=
+    { !my_model with
+      game_state=
+        ( if Seq.length uncovered_mines > 0 then Lost
+          else if
+            Seq.length still_covered_empty > 0 && Seq.length unflagged_mines > 0
+          then Playing
+          else Won ) } ;
   ()
 
 (* my_model := *)
@@ -841,7 +862,8 @@ let pressed_func a bn x y _b =
       imp_toggle_field_flag ()
   | _ ->
       () ) ;
-  check_game_state () ; ()
+  check_game_state !my_fields ;
+  ()
 
 let released_func a bn x y _b =
   let current_button = gesture_single_get_current_button a in
