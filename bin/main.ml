@@ -557,30 +557,21 @@ let my_fields = ref new_matrix
 let imp_uncover_field () =
   Printf.printf "going to uncover field\n%!" ;
   let tc = !my_model.tc in
-  let game_state = !my_model.game_state in
-  match game_state with
-  | Won ->
+  match tc with
+  | None ->
       ()
-  | Lost ->
+  | Some mtc ->
+      let current = Hashtbl.find !my_fields (mtc.y, mtc.x) in
+      let new_field_type =
+        match current.field_type with
+        | Covered ->
+            Uncovered
+        | _ ->
+            current.field_type
+      in
+      let newf = {mine_state= current.mine_state; field_type= new_field_type} in
+      Hashtbl.add !my_fields (mtc.y, mtc.x) newf ;
       ()
-  | Playing -> (
-    match tc with
-    | None ->
-        ()
-    | Some mtc ->
-        let current = Hashtbl.find !my_fields (mtc.y, mtc.x) in
-        let new_field_type =
-          match current.field_type with
-          | Covered ->
-              Uncovered
-          | _ ->
-              current.field_type
-        in
-        let newf =
-          {mine_state= current.mine_state; field_type= new_field_type}
-        in
-        Hashtbl.add !my_fields (mtc.y, mtc.x) newf ;
-        () )
 
 let imp_toggle_field_flag () =
   Printf.printf "going to toggle field flag\n%!" ;
@@ -615,15 +606,21 @@ let check_game_state the_fields =
       (fun f -> f.mine_state == Empty && f.field_type == Covered)
       all_fields
   in
+  let still_covered_flagged =
+    Seq.filter
+      (fun f -> f.mine_state == Empty && f.field_type == Flagged)
+      all_fields
+  in
   let unflagged_mines =
     Seq.filter
       (fun f -> f.mine_state == Mined && f.field_type == Covered)
       all_fields
   in
-  Printf.printf "%d %d %d\n"
+  Printf.printf "%d  %d %d  %d\n"
     (Seq.length uncovered_mines)
-    (* why these numbers do not go down as i click through the game? *)
     (Seq.length still_covered_empty)
+    (* unflagging does not work *)
+    (Seq.length still_covered_flagged)
     (Seq.length unflagged_mines) ;
   my_model :=
     { !my_model with
