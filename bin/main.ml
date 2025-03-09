@@ -546,7 +546,7 @@ let new_matrix =
             | None ->
                 Hashtbl.add ht (ri, ci) {mine_state= Empty; field_type= Covered}
             | Some mine ->
-                Hashtbl.add ht (ri, ci) mine )
+                Hashtbl.replace ht (ri, ci) mine )
           grid_indexes )
       grid_indexes
   in
@@ -627,9 +627,12 @@ let check_game_state the_fields =
       game_state=
         ( if Seq.length uncovered_mines > 0 then Lost
           else if
-            Seq.length still_covered_empty > 0 && Seq.length unflagged_mines > 0
-          then Playing
-          else Won ) } ;
+            Seq.length still_covered_empty == 0
+            && Seq.length unflagged_mines == 0
+            && Seq.length still_covered_flagged == 0
+            && Seq.length unflagged_mines == 0
+          then Won
+          else Playing ) } ;
   ()
 
 (* my_model := *)
