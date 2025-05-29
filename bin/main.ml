@@ -5,7 +5,7 @@
 
    Select the whole buffer pressing C-x h and then press C-c C-b to evaluate the whole buffer.
 
-  You can do C-c C-b to evaluate the whole buffer or select the following line
+  select the following line
   and doing C-c C-r
     # use "./bin/main.ml";;
 *)
